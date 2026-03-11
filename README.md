@@ -15,8 +15,7 @@ Aplicación de escritorio para registrar y analizar tus hábitos de lectura. Per
 ## Requisitos
 
 - Java 17 o superior
-- Cuenta en [Supabase](https://supabase.com) (gratuita)
-
+  
 ## Configuración de credenciales
 
 Las credenciales de Supabase **no están incluidas en el repositorio**. La primera vez que ejecutes la aplicación, ve a Ajustes e introduce:
