@@ -13,6 +13,7 @@ Aplicación de escritorio para registrar y analizar tus hábitos de lectura. Per
 - Búsqueda de portadas automática
 
 ## Code signing policy
+
 Free code signing provided by SignPath.io, certificate by SignPath Foundation.
 
 - Committers and reviewers: [tracklectura](https://github.com/tracklectura)
@@ -25,7 +26,7 @@ operating it.
 ## Requisitos
 
 - Java 17 o superior
-  
+
 ## Configuración de credenciales
 
 Las credenciales de Supabase **no están incluidas en el repositorio**. La primera vez que ejecutes la aplicación, ve a Ajustes e introduce:
@@ -37,9 +38,18 @@ Estos valores se guardan cifrados en local en `config.properties`, que está exc
 
 ## Compilar y ejecutar
 
+**Windows (PowerShell)**
+```powershell
+mkdir out
+javac -cp lib/* -d out (Get-ChildItem -Recurse -Filter *.java | Select-Object -ExpandProperty FullName)
+java -cp "out;lib/*" main.TrackerApp
+```
+
+**Linux / macOS**
 ```bash
-javac -cp lib/* -d out src/**/*.java
-java -cp out:lib/* main.TrackerApp
+mkdir -p out
+javac -cp "lib/*" -d out $(find . -name "*.java")
+java -cp "out:lib/*" main.TrackerApp
 ```
 
 ## Licencia
