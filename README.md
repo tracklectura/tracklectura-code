@@ -34,3 +34,32 @@ if (!(Test-Path out)) { mkdir out }
 $libs = (Get-ChildItem lib/*.jar | Select-Object -ExpandProperty FullName) -join ';'
 javac -cp "$libs;out" -d out (Get-ChildItem -Path src -Recurse -Filter *.java | Select-Object -ExpandProperty FullName)
 java -cp "$libs;out" main.TrackerApp
+```
+
+**Linux / macOS**
+
+```bash
+
+mkdir -p out
+
+javac -cp "lib/*:out" -d out $(find src -name "*.java")
+
+java -cp "lib/*:out" main.TrackerApp
+
+```
+
+## Documentación
+
+- [Manual en Español](docs/manual_es.md)
+
+- [Manual in English](docs/manual_en.md)
+
+- [Manuel en Français](docs/manual_fr.md)
+
+
+
+## Licencia
+
+
+
+MIT License — ver archivo [LICENSE](LICENSE)
