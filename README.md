@@ -20,17 +20,6 @@ La forma más sencilla de usar TrackLectura en Windows es descargando el instala
 
 > **Nota:** Si prefieres no instalar el programa en tu equipo o utilizas otro sistema operativo (Linux / macOS), puedes usar los comandos de compilación y ejecución que se detallan más abajo.
 
-## Code signing policy
-
-Free code signing provided by SignPath.io, certificate by SignPath Foundation.
-
-- Committers and reviewers: [tracklectura](https://github.com/tracklectura)
-- Approvers: [tracklectura](https://github.com/tracklectura)
-
-Privacy policy: This program will not transfer any information to other networked
-systems unless specifically requested by the user or the person installing or
-operating it.
-
 ## Requisitos
 
 - Java 17 o superior
