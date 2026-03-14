@@ -25,11 +25,14 @@ public class PostgresDatabaseService implements DatabaseService {
     }
 
     private HttpRequest.Builder baseRequest() {
+        // Renovar token si está próximo a caducar (o ya caducó)
+        SupabaseAuthService.ensureValidToken();
+
         return HttpRequest.newBuilder()
                 .header("apikey", ConfigManager.getSupabaseAnonKey())
                 .header("Authorization", "Bearer " + SupabaseAuthService.getCurrentAccessToken())
                 .header("Content-Type", "application/json")
-                .header("Prefer", "resolution=merge-duplicates"); // UPSERT equivalent
+                .header("Prefer", "resolution=merge-duplicates");
     }
 
     @Override
