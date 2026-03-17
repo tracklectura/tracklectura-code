@@ -515,6 +515,12 @@ public class ReadingTrackerGUI extends JFrame {
                 int ultimaPag = DatabaseManager.obtenerUltimaPagina(libroId);
                 paginaInicioField.setText(String.valueOf(ultimaPag));
                 actualizarTituloConSyncStatus();
+                // Recargar estado del libro por si se auto-completó desde HistoryWindow
+                String estadoActual = DatabaseManager.obtenerEstadoLibro(libroId);
+                if (estadoActual == null || estadoActual.isEmpty()) estadoActual = "Por leer";
+                estadoCombo.setEnabled(false);
+                estadoCombo.setSelectedItem(estadoActual);
+                estadoCombo.setEnabled(true);
             } else {
                 JOptionPane.showMessageDialog(this, "⚠️ Selecciona un libro primero.");
             }
@@ -749,7 +755,8 @@ public class ReadingTrackerGUI extends JFrame {
         // MEJORA: Cálculo delegado a ReadingCalculator
         double porc = utils.ReadingCalculator.calcularPorcentaje(leidas, totales);
         if (porc >= 0) {
-            lblPorcentaje.setText(String.format("Progreso: %.1f%%", porc));
+            String detallePags = String.format(" (%d / %d)", leidas, totales);
+            lblPorcentaje.setText(String.format("Progreso: %.1f%%%s", porc, detallePags));
             lblPorcentaje.setForeground(porc >= 100 ? new Color(46, 204, 113) : new Color(70, 130, 180));
         } else {
             lblPorcentaje.setText("Progreso: (Total págs. desc.)");
@@ -798,6 +805,24 @@ public class ReadingTrackerGUI extends JFrame {
 
             DatabaseManager.guardarSesion(id, capituloField.getText(), pIni, pFin, pagsLeidas, mins, ppm, pph, fecha);
 
+            // ── Actualizar estado del libro automáticamente según páginas ────────────
+            int paginasTotales = DatabaseManager.obtenerPaginasTotales(id);
+            String estadoActual = DatabaseManager.obtenerEstadoLibro(id);
+            boolean libroCompletado = paginasTotales > 0 && pFin >= paginasTotales;
+
+            if (libroCompletado && !"Terminado".equals(estadoActual)) {
+                DatabaseManager.actualizarEstadoLibro(id, "Terminado");
+                estadoCombo.setEnabled(false);
+                estadoCombo.setSelectedItem("Terminado");
+                estadoCombo.setEnabled(true);
+            } else if ("Por leer".equals(estadoActual)) {
+                // Primera sesión: pasar a "Leyendo" silenciosamente
+                DatabaseManager.actualizarEstadoLibro(id, "Leyendo");
+                estadoCombo.setEnabled(false);
+                estadoCombo.setSelectedItem("Leyendo");
+                estadoCombo.setEnabled(true);
+            }
+
             String mensajeResumen = """
                     📚 RESUMEN DE LECTURA
                     ---------------------------
@@ -809,6 +834,13 @@ public class ReadingTrackerGUI extends JFrame {
                     ---------------------------"""
                     .formatted(tituloLibro, mins, pagsLeidas, ppm, fecha);
             JOptionPane.showMessageDialog(this, mensajeResumen, "Sesión Finalizada", JOptionPane.INFORMATION_MESSAGE);
+
+            if (libroCompletado) {
+                JOptionPane.showMessageDialog(this,
+                        "🎉 ¡Felicidades! Has terminado de leer \"" + tituloLibro + "\".\n"
+                                + "El estado del libro se ha marcado automáticamente como Terminado.",
+                        "¡Libro completado!", JOptionPane.INFORMATION_MESSAGE);
+            }
 
             resetearSesionLocal();
             paginaInicioField.setText(String.valueOf(pFin));

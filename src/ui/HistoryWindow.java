@@ -142,6 +142,8 @@ public class HistoryWindow extends JDialog {
                 }
                 if (sigueEnTabla)
                     JOptionPane.showMessageDialog(this, "❌ Error al borrar.");
+            } else {
+                autoCompletarSiProcede();
             }
         }
     }
@@ -272,6 +274,7 @@ public class HistoryWindow extends JDialog {
                     fechaTexto)) {
                 dialog.dispose();
                 cargarDatos();
+                autoCompletarSiProcede();
             } else {
                 lblError.setText("❌ Error al actualizar en la base de datos.");
                 dialog.pack();
@@ -403,6 +406,7 @@ public class HistoryWindow extends JDialog {
                 dialog.dispose();
                 cargarDatos();
                 JOptionPane.showMessageDialog(this, "✅ Sesión añadida.");
+                autoCompletarSiProcede();
             } else {
                 lblError.setText("❌ Error al guardar en la base de datos.");
                 dialog.pack();
@@ -415,6 +419,35 @@ public class HistoryWindow extends JDialog {
         }
 
         dialog.setVisible(true);
+    }
+
+    /**
+     * Evalúa si el estado del libro debe cambiar tras guardar o editar una sesión:
+     * - Si el MAX pag_fin >= páginas totales (y totales > 0) → "Terminado"
+     * - Si el MAX pag_fin < páginas totales y el estado era "Terminado" → "Leyendo"
+     * - Si hay al menos una sesión y el libro estaba "Por leer" → "Leyendo"
+     */
+    private void autoCompletarSiProcede() {
+        int paginasTotales = DatabaseManager.obtenerPaginasTotales(libroId);
+        int maxPaginaLeida = DatabaseManager.obtenerUltimaPaginaLeida(libroId);
+        String estadoActual = DatabaseManager.obtenerEstadoLibro(libroId);
+
+        if (paginasTotales > 0 && maxPaginaLeida >= paginasTotales && !"Terminado".equals(estadoActual)) {
+            DatabaseManager.actualizarEstadoLibro(libroId, "Terminado");
+            JOptionPane.showMessageDialog(this,
+                    "🎉 ¡Felicidades! Has alcanzado la última página.\n"
+                            + "El estado del libro se ha marcado automáticamente como Terminado.",
+                    "¡Libro completado!", JOptionPane.INFORMATION_MESSAGE);
+        } else if (paginasTotales > 0 && maxPaginaLeida < paginasTotales && "Terminado".equals(estadoActual)) {
+            DatabaseManager.actualizarEstadoLibro(libroId, "Leyendo");
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ La página máxima registrada es ahora inferior al total del libro.\n"
+                            + "El estado del libro se ha revertido automáticamente a Leyendo.",
+                    "Estado actualizado", JOptionPane.INFORMATION_MESSAGE);
+        } else if ("Por leer".equals(estadoActual) && maxPaginaLeida > 0) {
+            // Primera sesión registrada: pasar de "Por leer" a "Leyendo" silenciosamente
+            DatabaseManager.actualizarEstadoLibro(libroId, "Leyendo");
+        }
     }
 
     /**
