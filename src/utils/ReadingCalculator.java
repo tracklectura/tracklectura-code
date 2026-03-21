@@ -90,7 +90,7 @@ public final class ReadingCalculator {
             return "La sesión es demasiado corta para guardarse.";
         }
         return null; // válido
-    }
+     }
 
     // --- NUEVOS MÉTODOS PARA GRÁFICOS ---
 
@@ -133,5 +133,32 @@ public final class ReadingCalculator {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Trunca un texto si supera el máximo de caracteres, añadiendo puntos suspensivos.
+     */
+    public static String acortar(String texto, int maxChars) {
+        if (texto == null || texto.length() <= maxChars) {
+            return texto;
+        }
+        return texto.substring(0, Math.max(0, maxChars - 3)) + "...";
+    }
+
+    /**
+     * Evita que suene el "pitido" de error de Windows al pulsar borrar en un campo vacío.
+     */
+    public static void silenciarCampo(javax.swing.JTextField field) {
+        field.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                int code = e.getKeyCode();
+                if ((code == java.awt.event.KeyEvent.VK_BACK_SPACE ||
+                        code == java.awt.event.KeyEvent.VK_DELETE) &&
+                        field.getText().isEmpty()) {
+                    e.consume();
+                }
+            }
+        });
     }
 }

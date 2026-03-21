@@ -172,6 +172,10 @@ public class HistoryWindow extends JDialog {
         JTextField fIni = new JTextField(iniActual);
         JTextField fFin = new JTextField(finActual);
         JTextField fMin = new JTextField(minActual);
+        
+        for (JTextField f : new JTextField[]{fFecha, fCap, fIni, fFin, fMin}) {
+            utils.ReadingCalculator.silenciarCampo(f);
+        }
 
         // Etiqueta de error roja, inicialmente en blanco
         JLabel lblError = new JLabel(" ");
@@ -304,6 +308,10 @@ public class HistoryWindow extends JDialog {
         JTextField fIni = new JTextField(String.valueOf(ultimaPag));
         JTextField fFin = new JTextField();
         JTextField fMin = new JTextField();
+
+        for (JTextField f : new JTextField[]{fFecha, fCap, fIni, fFin, fMin}) {
+            utils.ReadingCalculator.silenciarCampo(f);
+        }
 
         // Etiqueta de error (roja, inicialmente invisible)
         JLabel lblError = new JLabel(" ");

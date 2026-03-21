@@ -114,8 +114,11 @@ public class PanelLineaAcumulada extends JPanel {
             g2.rotate(Math.toRadians(45));
             g2.setFont(new Font("SansSerif", Font.PLAIN, 9));
             String[] partes = fechas.get(i).split(";");
-            for (int j = 0; j < partes.length; j++)
-                g2.drawString(partes[j], 0, j * 11);
+            for (int j = 0; j < partes.length; j++) {
+                String texto = partes[j];
+                if (j > 0) texto = utils.ReadingCalculator.acortar(texto, 25);
+                g2.drawString(texto, 0, j * 11);
+            }
             g2.setTransform(old);
         }
 

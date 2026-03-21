@@ -47,8 +47,6 @@ public class DatabaseManager {
         }
     }
 
-
-
     public static void cerrarYSincronizar() {
         if (service != null) {
             System.out.println("Sincronizando antes de cerrar...");
@@ -197,5 +195,13 @@ public class DatabaseManager {
         if (service == null)
             return false;
         return service.haySincronizacionPendiente();
+    }
+
+    /**
+     * Devuelve sesiones de TODOS los libros con columna libro incluida.
+     * Columnas: Libro;Fecha;Capítulo;Páginas;Minutos;PPM;PPH
+     */
+    public static List<String[]> obtenerDatosParaExportarTodos(String fFiltro, int minPag, boolean agrupar) {
+        return service.obtenerDatosParaExportarTodos(fFiltro, minPag, agrupar);
     }
 }

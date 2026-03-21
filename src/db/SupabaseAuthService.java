@@ -167,6 +167,50 @@ public class SupabaseAuthService {
     }
 
     // -------------------------------------------------------------------------
+    // Restablecimiento de contraseña
+    // -------------------------------------------------------------------------
+
+    /**
+     * Envía un correo de restablecimiento de contraseña al email indicado.
+     *
+     * Supabase envía un enlace mágico al email con el que el usuario puede
+     * establecer una nueva contraseña desde el navegador. La app no necesita
+     * gestionar el token manualmente.
+     *
+     * @param email Correo electrónico registrado en Supabase
+     * @return null si el email se envió correctamente, o un mensaje de error
+     */
+    public static String enviarEmailRestablecimiento(String email) {
+        String urlStr = ConfigManager.getSupabaseUrl() + "/auth/v1/recover";
+        String anonKey = ConfigManager.getSupabaseAnonKey();
+
+        if (ConfigManager.getSupabaseUrl().isEmpty() || anonKey.isEmpty())
+            return "Faltan credenciales de Supabase en la configuración.";
+
+        if (email == null || email.isBlank())
+            return "Introduce un correo electrónico válido.";
+
+        try {
+            JsonObject body = new JsonObject();
+            body.addProperty("email", email);
+
+            HttpResponse<String> response = enviarPost(urlStr, anonKey, body.toString());
+
+            // Supabase devuelve 200 tanto si el email existe como si no
+            // (por seguridad no revela si el usuario está registrado).
+            if (response.statusCode() == 200) {
+                return null; // éxito
+            } else {
+                return "Error al enviar el email: "
+                        + extraerMensajeError(response.body(), "No se pudo enviar el correo.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error de red: " + e.getMessage();
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
 

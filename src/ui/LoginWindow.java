@@ -13,7 +13,7 @@ public class LoginWindow extends JFrame {
 
     private JTextField emailField;
     private JPasswordField passwordField;
-    private JButton loginBtn, signupBtn;
+    private JButton loginBtn, signupBtn, resetBtn;
     private JLabel statusLabel;
 
     private final Runnable onSuccess;
@@ -22,7 +22,7 @@ public class LoginWindow extends JFrame {
         super("Supabase Login - TrackLectura");
         this.onSuccess = onSuccess;
 
-        setSize(430, 320);
+        setSize(430, 370);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -43,7 +43,7 @@ public class LoginWindow extends JFrame {
         emailField = new JTextField(utils.ConfigManager.getSavedEmail());
         emailField.setMargin(new Insets(2, 5, 2, 5));
         formPanel.add(emailField);
-        
+
         formPanel.add(new JLabel("Contraseña:"));
         passwordField = new JPasswordField(utils.ConfigManager.getSavedPassword());
         passwordField.setMargin(new Insets(2, 5, 2, 5));
@@ -64,12 +64,24 @@ public class LoginWindow extends JFrame {
 
         JButton offlineBtn = new JButton("Acceder sin conexión (Modo Invitado)");
         JPanel buttonRow2 = new JPanel(new BorderLayout());
-        buttonRow2.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        buttonRow2.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         buttonRow2.add(offlineBtn, BorderLayout.CENTER);
 
-        JPanel allButtonsPanel = new JPanel(new BorderLayout());
+        resetBtn = new JButton("¿Olvidaste tu contraseña?");
+        resetBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        resetBtn.setBorderPainted(false);
+        resetBtn.setContentAreaFilled(false);
+        resetBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JPanel buttonRow3 = new JPanel(new BorderLayout());
+        buttonRow3.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+        buttonRow3.add(resetBtn, BorderLayout.CENTER);
+
+        JPanel allButtonsPanel = new JPanel(new BorderLayout(0, 0));
+        JPanel middleRows = new JPanel(new BorderLayout());
+        middleRows.add(buttonRow2, BorderLayout.NORTH);
+        middleRows.add(buttonRow3, BorderLayout.SOUTH);
         allButtonsPanel.add(buttonRow1, BorderLayout.NORTH);
-        allButtonsPanel.add(buttonRow2, BorderLayout.SOUTH);
+        allButtonsPanel.add(middleRows, BorderLayout.SOUTH);
         bottomPanel.add(allButtonsPanel, BorderLayout.SOUTH);
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -78,6 +90,7 @@ public class LoginWindow extends JFrame {
         loginBtn.addActionListener(ignored -> performLogin());
         signupBtn.addActionListener(ignored -> performSignup());
         offlineBtn.addActionListener(ignored -> performOfflineLogin());
+        resetBtn.addActionListener(ignored -> performPasswordReset());
 
         // Enter en cualquier campo dispara el login
         java.awt.event.ActionListener enterListener = ignored -> loginBtn.doClick();
@@ -85,6 +98,43 @@ public class LoginWindow extends JFrame {
         passwordField.addActionListener(enterListener);
 
         aplicarTema(utils.ConfigManager.isDarkMode());
+    }
+
+    private void performPasswordReset() {
+        String email = emailField.getText().trim();
+        if (email.isEmpty()) {
+            showError("Introduce tu correo electrónico primero.");
+            return;
+        }
+
+        setButtonsEnabled(false);
+        statusLabel.setForeground(getInfoColor());
+        statusLabel.setText("Enviando correo...");
+
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() {
+                return db.SupabaseAuthService.enviarEmailRestablecimiento(email);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String error = get();
+                    if (error == null) {
+                        statusLabel.setForeground(new Color(46, 204, 113));
+                        statusLabel.setText(
+                                "<html><center>Correo enviado. Revisa tu bandeja de entrada.</center></html>");
+                    } else {
+                        showError(error);
+                    }
+                } catch (Exception ex) {
+                    showError("Error al enviar el correo.");
+                } finally {
+                    setButtonsEnabled(true);
+                }
+            }
+        }.execute();
     }
 
     private void performOfflineLogin() {
@@ -207,6 +257,7 @@ public class LoginWindow extends JFrame {
     private void setButtonsEnabled(boolean enabled) {
         loginBtn.setEnabled(enabled);
         signupBtn.setEnabled(enabled);
+        resetBtn.setEnabled(enabled);
     }
 
     private void aplicarTema(boolean oscuro) {

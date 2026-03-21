@@ -62,8 +62,12 @@ public class PanelGrafica extends JPanel {
             g2.rotate(Math.toRadians(45));
             String[] partes = fechas.get(i).split(";");
             for (int j = 0; j < partes.length; j++) {
+                String texto = partes[j];
+                if (j > 0) { // Si es el capítulo/título
+                    texto = utils.ReadingCalculator.acortar(texto, 25);
+                }
                 g2.setFont(new Font("SansSerif", Font.PLAIN, j == 0 ? 10 : 9));
-                g2.drawString(partes[j], 0, j * 12);
+                g2.drawString(texto, 0, j * 12);
             }
             g2.setTransform(old);
         }

@@ -50,6 +50,19 @@ public class SessionTimer {
         tiempoInicio = 0;
     }
 
+    /**
+     * Ajusta el tiempo del cronómetro sumando o restando milisegundos.
+     * @param millisDelta Milisegundos a añadir (positivo) o restar (negativo).
+     */
+    public void ajustarTiempo(long millisDelta) {
+        long totalActual = getTotalMillis();
+        if (totalActual + millisDelta < 0) {
+            tiempoAcumulado -= totalActual; // Cap at 0
+        } else {
+            tiempoAcumulado += millisDelta;
+        }
+    }
+
     public boolean isCorriendo() {
         return corriendo;
     }

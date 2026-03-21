@@ -39,6 +39,7 @@ public class BookSearchField extends JPanel {
         searchField = new JTextField();
         searchField.setFont(new Font("SansSerif", Font.PLAIN, 13));
         searchField.setToolTipText("Escribe para buscar un libro...");
+        utils.ReadingCalculator.silenciarCampo(searchField);
         add(searchField, BorderLayout.CENTER);
 
         // --- Botón desplegable (▼) ---
@@ -115,10 +116,12 @@ public class BookSearchField extends JPanel {
                     }
                     case KeyEvent.VK_ENTER -> {
                         String sel = resultList.getSelectedValue();
-                        if (sel != null)
+                        if (sel != null) {
                             seleccionarLibro(sel);
-                        else if (listModel.size() == 1)
+                        } else if (listModel.size() > 0) {
+                            // Si no hay selección pero hay resultados, elegir el primero
                             seleccionarLibro(listModel.get(0));
+                        }
                     }
                     case KeyEvent.VK_ESCAPE -> {
                         popup.setVisible(false);
@@ -144,17 +147,22 @@ public class BookSearchField extends JPanel {
         searchField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                filtrar();
+                if (searchField.getText().isEmpty()) {
+                    filtrarMostrandoTodos();
+                } else {
+                    filtrar();
+                }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                // Esperar un poco antes de cerrar (permite clic en la lista)
-                Timer t = new Timer(150, ev -> {
-                    if (!resultList.hasFocus()) {
+                // No cerramos inmediatamente para permitir clics en el JPopupMenu
+                Timer t = new Timer(200, ev -> {
+                    if (!searchField.hasFocus() && !resultList.hasFocus()) {
                         popup.setVisible(false);
-                        // Si el campo tiene texto parcial que no coincide con un libro, restaurar
-                        if (selectedBook != null && !searchField.getText().equals(selectedBook)) {
+                        // Solo restaurar si el campo ha quedado "incompleto" o vacío incorrectamente
+                        String current = searchField.getText().trim();
+                        if (selectedBook != null && !current.equals(selectedBook) && !current.isEmpty()) {
                             searchField.setText(selectedBook);
                         }
                     }
@@ -176,19 +184,27 @@ public class BookSearchField extends JPanel {
         String query = searchField.getText().trim().toLowerCase();
         listModel.clear();
 
-        // Si el campo está vacío y no hay libro seleccionado, cerrar popup
-        if (query.isEmpty() && selectedBook == null) {
+        // Si el campo está vacío, cerramos el popup (salvo que se pulse el botón dropdown)
+        if (query.isEmpty()) {
             popup.setVisible(false);
             return;
         }
 
-        boolean hayCoincidencias = false;
+        List<String> startsWith = new ArrayList<>();
+        List<String> contains = new ArrayList<>();
         for (String book : allBooks) {
-            if (query.isEmpty() || book.toLowerCase().contains(query)) {
-                listModel.addElement(book);
-                hayCoincidencias = true;
+            String lowerBook = book.toLowerCase();
+            if (query.isEmpty() || lowerBook.startsWith(query)) {
+                startsWith.add(book);
+            } else if (lowerBook.contains(query)) {
+                contains.add(book);
             }
         }
+
+        for (String b : startsWith) listModel.addElement(b);
+        for (String b : contains) listModel.addElement(b);
+
+        boolean hayCoincidencias = !listModel.isEmpty();
 
         if (!hayCoincidencias) {
             popup.setVisible(false);
@@ -229,22 +245,40 @@ public class BookSearchField extends JPanel {
      * que el ancho del panel esté disponible.
      */
     private void actualizarOShowPopup() {
-        if (!isShowing() || listModel.isEmpty())
+        if (!isShowing() || listModel.isEmpty()) {
+            popup.setVisible(false);
             return;
+        }
 
         SwingUtilities.invokeLater(() -> {
-            if (listModel.isEmpty())
+            if (listModel.isEmpty() || !isShowing()) {
+                popup.setVisible(false);
                 return;
+            }
             int ancho = getWidth();
-            int alto = Math.min(listModel.size() * 28 + 4, 220);
+            int alto = Math.min(listModel.size() * 28 + 4, 300);
             popup.setPreferredSize(new Dimension(ancho, alto));
+            popup.pack();
 
-            if (!popup.isVisible()) {
-                popup.show(BookSearchField.this, 0, getHeight());
+            // Determinar si mostrar arriba o abajo basado en el espacio en la ventana
+            Component window = SwingUtilities.getWindowAncestor(this);
+            if (window != null) {
+                Point p = new Point(0, 0);
+                SwingUtilities.convertPointToScreen(p, this);
+                GraphicsConfiguration gc = window.getGraphicsConfiguration();
+                Rectangle screenBounds = gc.getBounds();
+                
+                int spaceBelow = screenBounds.y + screenBounds.height - (p.y + getHeight());
+                
+                if (spaceBelow < alto + 20 && p.y > alto) {
+                    // Mostrar arriba
+                    popup.show(this, 0, -alto);
+                } else {
+                    // Mostrar abajo
+                    popup.show(this, 0, getHeight());
+                }
             } else {
-                popup.pack();
-                popup.revalidate();
-                popup.repaint();
+                popup.show(this, 0, getHeight());
             }
         });
     }

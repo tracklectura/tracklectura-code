@@ -46,7 +46,8 @@ public class ReadingTrackerGUI extends JFrame {
     private StateSelectorField estadoCombo;
     private JButton agregarLibroBtn, editarLibroBtn, eliminarLibroBtn, darkModeBtn,
             iniciarBtn, pausarBtn, terminarBtn, verGraficoBtn, historialBtn,
-            correctaCoverBtn, otraCoverBtn, subirPortadaBtn;
+            correctaCoverBtn, otraCoverBtn, subirPortadaBtn,
+            reiniciarTimerBtn, retrocederBtn, avanzarBtn;
     private JTextField capituloField, paginaInicioField, paginaFinField;
     private JLabel tiempoLabel, rachaLabel, coverLabel, lblEstimacion, lblPorcentaje;
     private JPanel mainPanel, coverOptionsPanel;
@@ -213,6 +214,10 @@ public class ReadingTrackerGUI extends JFrame {
         capituloField = new JTextField();
         paginaInicioField = new JTextField();
         paginaFinField = new JTextField();
+        
+        utils.ReadingCalculator.silenciarCampo(capituloField);
+        utils.ReadingCalculator.silenciarCampo(paginaInicioField);
+        utils.ReadingCalculator.silenciarCampo(paginaFinField);
 
         iniciarBtn = new JButton("▶ INICIAR");
         pausarBtn = new JButton("⏸ PAUSAR");
@@ -273,10 +278,26 @@ public class ReadingTrackerGUI extends JFrame {
         JPanel botPanel = new JPanel(new BorderLayout(10, 10));
         botPanel.setOpaque(false);
 
-        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         timePanel.setOpaque(false);
+        
+        retrocederBtn = createStyledButton("⏪", new Color(52, 152, 219));
+        retrocederBtn.setToolTipText("Retroceder 5 segundos");
+        retrocederBtn.setPreferredSize(new Dimension(50, 30));
+        
+        avanzarBtn = createStyledButton("⏩", new Color(52, 152, 219));
+        avanzarBtn.setToolTipText("Avanzar 5 segundos");
+        avanzarBtn.setPreferredSize(new Dimension(50, 30));
+
+        reiniciarTimerBtn = createStyledButton("↺", new Color(231, 76, 60));
+        reiniciarTimerBtn.setToolTipText("Reiniciar cronómetro");
+        reiniciarTimerBtn.setPreferredSize(new Dimension(50, 30));
+
+        timePanel.add(retrocederBtn);
         timePanel.add(new JLabel("⏱️"));
         timePanel.add(tiempoLabel);
+        timePanel.add(avanzarBtn);
+        timePanel.add(reiniciarTimerBtn);
 
         lblPorcentaje = new JLabel("Progreso: --%", SwingConstants.CENTER);
         lblPorcentaje.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -346,6 +367,11 @@ public class ReadingTrackerGUI extends JFrame {
     private void cambiarColorRecursivo(Container container, Color bg, Color fg, Color inputBg, boolean oscuro) {
         for (Component c : container.getComponents()) {
             if (c instanceof JButton b) {
+                // MEJORA: No sobrescribir colores de botones con colores específicos (timer, portadas)
+                if (b == retrocederBtn || b == avanzarBtn || b == reiniciarTimerBtn || 
+                    b == correctaCoverBtn || b == otraCoverBtn || b == subirPortadaBtn) {
+                    continue;
+                }
                 b.setOpaque(true);
                 b.setContentAreaFilled(true);
                 b.setBorder(BorderFactory.createLineBorder(oscuro ? new Color(60, 60, 60) : Color.LIGHT_GRAY));
@@ -432,6 +458,24 @@ public class ReadingTrackerGUI extends JFrame {
             actualizarColoresUI();
         });
 
+        retrocederBtn.addActionListener(ignored -> {
+            sessionTimer.ajustarTiempo(-5000);
+            tiempoLabel.setText(SessionTimer.formatearTiempo(sessionTimer.getTotalMillis()));
+        });
+
+        avanzarBtn.addActionListener(ignored -> {
+            sessionTimer.ajustarTiempo(5000);
+            tiempoLabel.setText(SessionTimer.formatearTiempo(sessionTimer.getTotalMillis()));
+        });
+
+        reiniciarTimerBtn.addActionListener(ignored -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Reiniciar cronómetro?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                resetearSesionLocal();
+                actualizarColoresUI();
+            }
+        });
+
         agregarLibroBtn.addActionListener(ignored -> {
             String nombre = JOptionPane.showInputDialog(this, "Nombre del nuevo libro:");
             if (nombre != null && !nombre.trim().isEmpty()) {
@@ -461,6 +505,7 @@ public class ReadingTrackerGUI extends JFrame {
                     int nuevasPags = Integer.parseInt(pagsStr);
                     int libroId = DatabaseManager.obtenerLibroId(libro);
                     DatabaseManager.actualizarPaginasTotales(libroId, nuevasPags);
+                    actualizarEstimacion();
                     JOptionPane.showMessageDialog(this, "✅ Total de páginas actualizado.");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this, "❌ Por favor, introduce un número válido.");
@@ -778,6 +823,8 @@ public class ReadingTrackerGUI extends JFrame {
     }
 
     private void procesarTerminarSesion() {
+        sessionTimer.pausar();
+        updateButtonStates();
         try {
             int pIni = Integer.parseInt(paginaInicioField.getText().trim());
             int pFin = Integer.parseInt(paginaFinField.getText().trim());

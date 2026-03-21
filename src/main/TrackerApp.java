@@ -42,6 +42,7 @@ public class TrackerApp {
                 /* sin LAF personalizado */ }
         }
 
+
         // Lanzar la UI en el Event Dispatch Thread de Swing
         SwingUtilities.invokeLater(
                 () -> new LoginWindow(() -> new ReadingTrackerGUI().setVisible(true)).setVisible(true));

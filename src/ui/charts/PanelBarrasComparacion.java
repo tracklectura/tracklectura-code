@@ -85,9 +85,7 @@ public class PanelBarrasComparacion extends JPanel {
             // Nombre libro a la izquierda
             g2.setColor(colorTexto);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
-            String nombre = p.getEtiqueta().length() > 30
-                    ? p.getEtiqueta().substring(0, 29) + "…"
-                    : p.getEtiqueta();
+            String nombre = utils.ReadingCalculator.acortar(p.getEtiqueta(), 30);
             g2.drawString(nombre,
                     mIzq - g2.getFontMetrics().stringWidth(nombre) - 8,
                     yBarra + alturaBarra / 2 + 5);

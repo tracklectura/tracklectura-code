@@ -103,6 +103,7 @@ public class PanelLineaSimple extends JPanel {
                 int m = Integer.parseInt(labelStr.substring(5, 7));
                 labelStr = meses[m - 1] + " " + labelStr.substring(0, 4);
             }
+            labelStr = utils.ReadingCalculator.acortar(labelStr, 30);
             g2.drawString(labelStr, 0, 0);
             g2.setTransform(old);
         }

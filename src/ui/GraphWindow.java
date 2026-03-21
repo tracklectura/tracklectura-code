@@ -127,6 +127,8 @@ public class GraphWindow extends JFrame {
         lblLibro = crearLabel("Libro:", texto);
         fieldMinPag = new JTextField("0", 4);
         fieldFecha = new JTextField("", 8);
+        utils.ReadingCalculator.silenciarCampo(fieldMinPag);
+        utils.ReadingCalculator.silenciarCampo(fieldFecha);
         lblMinPag = crearLabel("Pág >:", texto);
         lblFecha = crearLabel("Fecha:", texto);
 
