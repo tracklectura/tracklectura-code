@@ -120,6 +120,7 @@ public class GraphWindow extends JFrame {
         libroSearchField.setOnSelectionChanged(libro -> {
             if (libro != null) {
                 libroSeleccionado = libro;
+                hitosAbiertosUsuario = true;
                 refrescarGrafica();
             }
         });
@@ -289,7 +290,7 @@ public class GraphWindow extends JFrame {
      * Correlación: Minutos vs PPM    |  ✓*   |  ✗   |  ✗    |  ✗    |  ✗  |   ✗     |  ✗    |  ✗
      * Mapa de Consistencia           |  ✗    |  ✗   |  ✗    |  ✗    |  ✗  |   ✗     |  ✗    |  ✗
      * </pre>
-     * 
+     *
      * ✓* = soporta "Todos los libros" además del selector individual.
      */
     private void actualizarVisibilidadFiltros() {
@@ -382,6 +383,13 @@ public class GraphWindow extends JFrame {
             String msg = "Este libro aún no tiene sesiones almacenadas.";
             if ("Actividad por Hora".equals(metrica) && libroSeleccionado != null)
                 msg = "Este libro no tiene registros de hora (solo fecha).";
+            // Ocultar hitos y barra antes de salir: el libro no tiene sesiones
+            panelHitos.setVisible(false);
+            btnVerHitos.setVisible(false);
+            barraProgreso.setVisible(false);
+            if (lblProgreso != null) lblProgreso.setVisible(false);
+            labelEstimacion.setText("");
+            labelEstimacion.setVisible(false);
             mostrarMensajeSinDatos(msg);
             return;
         }
@@ -515,6 +523,14 @@ public class GraphWindow extends JFrame {
             return;
         int libroId = DatabaseManager.obtenerLibroId(libroSeleccionado);
         double maxMin = DatabaseManager.obtenerSesionMasLarga(libroId);
+
+        // Sin sesiones → ocultar panel completamente
+        if (maxMin <= 0) {
+            panelHitos.setVisible(false);
+            btnVerHitos.setVisible(false);
+            return;
+        }
+
         String diaRec = DatabaseManager.obtenerDiaMasLectura(libroId);
         double maxPpm = DatabaseManager.obtenerVelocidadMaxima(libroId);
 
