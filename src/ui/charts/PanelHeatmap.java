@@ -50,7 +50,7 @@ public class PanelHeatmap extends JPanel {
         int  marginX         = (getWidth() - gridW) / 2;
         if (marginX < 60) marginX = 60;
 
-        // Etiquetas días de la semana
+
         String[] diasNames = { "Lun", "", "Mié", "", "Vie", "", "Dom" };
         g2.setColor(modoOscuro ? Color.LIGHT_GRAY : Color.DARK_GRAY);
         g2.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -84,7 +84,7 @@ public class PanelHeatmap extends JPanel {
             actual = actual.plusDays(1);
         }
 
-        // Leyenda
+
         int lx = marginX;
         int ly = marginY + 7 * (cellSize + gap) + 30;
         g2.setFont(new Font("SansSerif", Font.PLAIN, 10));

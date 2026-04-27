@@ -63,7 +63,7 @@ public class PanelGrafica extends JPanel {
             String[] partes = fechas.get(i).split(";");
             for (int j = 0; j < partes.length; j++) {
                 String texto = partes[j];
-                if (j > 0) { // Si es el capítulo/título
+                if (j > 0) {
                     texto = utils.ReadingCalculator.acortar(texto, 25);
                 }
                 g2.setFont(new Font("SansSerif", Font.PLAIN, j == 0 ? 10 : 9));

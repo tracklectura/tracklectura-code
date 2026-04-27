@@ -23,17 +23,16 @@ public class PostgresDatabaseService implements DatabaseService {
     private final HttpClient httpClient = HttpClient.newBuilder().build();
 
     private String getBaseUrl() {
-        return ConfigManager.getSupabaseUrl() + "/rest/v1";
+        return ConfigManager.getSupabaseUrl() + "restv1";
     }
 
     private HttpRequest.Builder baseRequest() {
-        // Renovar token si está próximo a caducar (o ya caducó)
         SupabaseAuthService.ensureValidToken();
 
         return HttpRequest.newBuilder()
                 .header("apikey", ConfigManager.getSupabaseAnonKey())
                 .header("Authorization", "Bearer " + SupabaseAuthService.getCurrentAccessToken())
-                .header("Content-Type", "application/json")
+                .header("Content-Type", "applicationjson")
                 .header("Prefer", "resolution=merge-duplicates");
     }
 
@@ -47,7 +46,6 @@ public class PostgresDatabaseService implements DatabaseService {
 
     @Override
     public void crearEsquema() {
-        // No-Op in REST API. User manages tables in Supabase Web.
     }
 
     @Override
@@ -58,8 +56,8 @@ public class PostgresDatabaseService implements DatabaseService {
             json.addProperty("email", email);
 
             HttpRequest req = baseRequest()
-                    .uri(URI.create(getBaseUrl() + "/usuarios"))
-                    .header("Prefer", "resolution=merge-duplicates") // UPSERT equivalent
+                    .uri(URI.create(getBaseUrl() + "usuarios"))
+                    .header("Prefer", "resolution=merge-duplicates")
                     .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                     .build();
             httpClient.send(req, HttpResponse.BodyHandlers.discarding());
@@ -70,14 +68,14 @@ public class PostgresDatabaseService implements DatabaseService {
 
     @Override
     public void limpiarDatosDeOtrosUsuarios(String currentUserId) {
-        // No-Op in Postgres: Cada usuario solo puede ver lo suyo por RLS o query
-        // manual,
-        // no hay necesidad de borrar nada de la DB central.
+
+
+
     }
 
     @Override
     public Connection getConnection() {
-        return null; // Not applicable for REST
+        return null;
     }
 
     @Override
@@ -91,7 +89,7 @@ public class PostgresDatabaseService implements DatabaseService {
 
             HttpRequest req = baseRequest()
                     .uri(URI.create(getBaseUrl() + "/libros"))
-                    .header("Prefer", "resolution=ignore-duplicates") // UPSERT equivalent mapping
+                    .header("Prefer", "resolution=ignore-duplicates")
                     .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                     .build();
             httpClient.send(req, HttpResponse.BodyHandlers.discarding());
@@ -313,7 +311,7 @@ public class PostgresDatabaseService implements DatabaseService {
         return 0;
     }
 
-    // -- Métodos de parseo seguro para evitar JsonNull --
+
     private int safeInt(JsonObject o, String key, int def) {
         if (!o.has(key) || o.get(key).isJsonNull())
             return def;
@@ -326,16 +324,16 @@ public class PostgresDatabaseService implements DatabaseService {
         return o.get(key).getAsDouble();
     }
 
-    // -- Métodos Analíticos (Evaluación Local en Java) --
+
 
     private String normalizeDate(String fechaStr) {
         if (fechaStr == null || fechaStr.isEmpty())
             return "N/A";
         String f = fechaStr;
         if (f.contains(" ")) {
-            f = f.split(" ")[0]; // Get only the date portion (dd/MM/yyyy HH:mm)
+            f = f.split(" ")[0];
         } else if (f.contains("T")) {
-            f = f.split("T")[0]; // Handle ISO 8601 format: 2026-03-05T03:07:00
+            f = f.split("T")[0];
         }
 
         DateTimeFormatter fmtApp = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -347,14 +345,14 @@ public class PostgresDatabaseService implements DatabaseService {
         } catch (Exception e1) {
             try {
                 LocalDate d = LocalDate.parse(f, fmtIso);
-                return d.format(fmtApp); // Normalize to dd/MM/yyyy
+                return d.format(fmtApp);
             } catch (Exception e2) {
                 try {
-                    // Try parsing M/d/yyyy just in case
+
                     LocalDate d = LocalDate.parse(f, DateTimeFormatter.ofPattern("M/d/yyyy"));
                     return d.format(fmtApp);
                 } catch (Exception e3) {
-                    return f; // fallback
+                    return f;
                 }
             }
         }
@@ -500,7 +498,7 @@ public class PostgresDatabaseService implements DatabaseService {
             LocalDate hoy = LocalDate.now();
             List<LocalDate> unicas = fechas.stream()
                     .distinct()
-                    .filter(d -> !d.isAfter(hoy)) // Ignore future dates
+                    .filter(d -> !d.isAfter(hoy))
                     .sorted(Comparator.reverseOrder())
                     .toList();
 
@@ -591,8 +589,8 @@ public class PostgresDatabaseService implements DatabaseService {
             json.addProperty("pph", pph);
             json.addProperty("user_id", SupabaseAuthService.getCurrentUserId());
 
-            // If No UUID is provided for manual entry, we generate one to satisfy
-            // uniqueness
+
+
             json.addProperty("uuid", java.util.UUID.randomUUID().toString());
 
             HttpRequest req = baseRequest()
@@ -638,14 +636,14 @@ public class PostgresDatabaseService implements DatabaseService {
     @Override
     public List<DataPoint> obtenerDatosGrafica(String column, int libroId, int minPag, boolean agruparPorDia,
             boolean esHeatmap, boolean esDual) {
-        // Obtenemos todo y procesamos local en Java
+
         List<Sesion> lista = esHeatmap ? obtenerTodasLasSesiones() : obtenerSesionesPorLibro(libroId);
-        // Filtrar por pInicio >= minPag si no es heatmap
+
         if (!esHeatmap) {
             lista = lista.stream().filter(s -> s.getPaginaInicio() >= minPag).toList();
         }
-        // obtenerSesionesPorLibro ya devuelve orden ASC (cronológico)
-        // por lo que no hace falta invertirlo para el gráfico.
+
+
 
         List<DataPoint> result = new ArrayList<>();
         if (agruparPorDia || esHeatmap) {
@@ -759,14 +757,14 @@ public class PostgresDatabaseService implements DatabaseService {
 
     @Override
     public List<String[]> obtenerDatosParaExportarTodos(String fFiltro, int minPag, boolean agrupar) {
-        // El servicio remoto no implementa esta operación compuesta;
-        // SQLiteSyncService la resuelve localmente con un JOIN.
+
+
         return new ArrayList<>();
     }
 
     @Override
     public void sincronizarConNube() {
-        // No-op para el servicio remoto
+
     }
 
     @Override
@@ -774,7 +772,7 @@ public class PostgresDatabaseService implements DatabaseService {
         List<Sesion> list = new ArrayList<>();
         try {
             String userId = SupabaseAuthService.getCurrentUserId();
-            // Filtrar por updated_at > timestamp
+
             String url = getBaseUrl() + "/sesiones?user_id=eq." + userId;
             if (timestamp != null && !timestamp.isEmpty()) {
                 url += "&updated_at=gt." + URLEncoder.encode(timestamp, StandardCharsets.UTF_8);

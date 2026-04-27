@@ -28,17 +28,17 @@ import java.util.List;
  */
 public class GraphWindow extends JFrame {
 
-    // ── Estado ────────────────────────────────────────────────────────────────
+
     private String libroSeleccionado;
     private final boolean modoOscuro;
     private boolean hitosAbiertosUsuario = true;
 
-    // ── Paneles principales ───────────────────────────────────────────────────
+
     private JPanel container;
     private JPanel filterPanel;
     private JPanel panelHitos;
 
-    // ── Controles de filtro ───────────────────────────────────────────────────
+
     private JComboBox<String> comboMetrica;
     private BookSearchField libroSearchField;
     private JTextField fieldMinPag, fieldFecha;
@@ -47,10 +47,10 @@ public class GraphWindow extends JFrame {
     private JLabel lblLibro, lblProgreso, lblMinPag, lblFecha, labelEstimacion;
     private JProgressBar barraProgreso;
 
-    // ── Hitos personales ──────────────────────────────────────────────────────
+
     private JLabel lblSesionLarga, lblDiaRecord, lblVelocidadMax;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
+
 
     public GraphWindow(boolean modoOscuro, String libroInicial) {
         super("📊 Análisis y Gráficas");
@@ -71,9 +71,9 @@ public class GraphWindow extends JFrame {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Construcción de la interfaz
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     private void inicializarInterfaz() {
         Color fondo = modoOscuro ? new Color(45, 45, 45) : new Color(240, 240, 240);
@@ -91,13 +91,13 @@ public class GraphWindow extends JFrame {
         refrescarGrafica();
     }
 
-    // ── Panel de filtros ──────────────────────────────────────────────────────
+
 
     private void construirFilterPanel(Color fondo, Color texto) {
         filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
         filterPanel.setBackground(fondo);
 
-        // Métrica
+
         comboMetrica = new JComboBox<>(new String[] {
                 "Páginas Totales", "PPM (Velocidad)", "Progreso Acumulado",
                 "Meta Anual", "Evolución Mensual",
@@ -108,7 +108,7 @@ public class GraphWindow extends JFrame {
         comboMetrica.setBackground(modoOscuro ? new Color(60, 60, 60) : Color.WHITE);
         comboMetrica.setForeground(texto);
 
-        // Selector de libro
+
         libroSearchField = new BookSearchField();
         libroSearchField.setPreferredSize(new Dimension(200, 26));
         List<String> libros = DatabaseManager.obtenerTodosLosLibros();
@@ -162,7 +162,7 @@ public class GraphWindow extends JFrame {
         UIManager.put("ProgressBar.selectionBackground", Color.BLACK);
         SwingUtilities.updateComponentTreeUI(barraProgreso);
 
-        // Añadir al panel
+
         filterPanel.add(crearLabel("Métrica:", texto));
         filterPanel.add(comboMetrica);
         filterPanel.add(lblLibro);
@@ -183,7 +183,7 @@ public class GraphWindow extends JFrame {
         filterPanel.add(lblProgreso);
         filterPanel.add(barraProgreso);
 
-        // Listener del combo (visibilidad de controles)
+
         comboMetrica.addItemListener(e -> {
             if (e.getStateChange() != java.awt.event.ItemEvent.SELECTED)
                 return;
@@ -191,20 +191,20 @@ public class GraphWindow extends JFrame {
             refrescarGrafica();
         });
 
-        // Listeners de botones definidos en conectarEventos()
+
         btnActualizar.addActionListener(ignored -> refrescarGrafica());
         btnRuta.addActionListener(ignored -> seleccionarCarpetaExportacion());
         btnExportarCSV.addActionListener(ignored -> exportarCSV());
     }
 
-    // ── Panel contenedor de la gráfica ────────────────────────────────────────
+
 
     private void construirContenedor() {
         container = new JPanel(new BorderLayout());
         container.setBackground(modoOscuro ? new Color(30, 30, 30) : Color.WHITE);
     }
 
-    // ── Panel de hitos personales ─────────────────────────────────────────────
+
 
     private void construirPanelHitos(Color fondo, Color texto) {
         panelHitos = new JPanel(new GridBagLayout());
@@ -258,7 +258,7 @@ public class GraphWindow extends JFrame {
         panelHitos.add(lblVelocidadMax, gbc);
     }
 
-    // ── Eventos ───────────────────────────────────────────────────────────────
+
 
     private void conectarEventos() {
         btnVerHitos.addActionListener(ignored -> {
@@ -269,9 +269,9 @@ public class GraphWindow extends JFrame {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Visibilidad de controles según métrica
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     /**
      * Tabla de visibilidad de controles por métrica.
@@ -296,7 +296,7 @@ public class GraphWindow extends JFrame {
     private void actualizarVisibilidadFiltros() {
         String sel = (String) comboMetrica.getSelectedItem();
 
-        // ── Clasificación de la métrica ───────────────────────────────────────
+
         boolean esEstandar = "Páginas Totales".equals(sel) || "PPM (Velocidad)".equals(sel);
         boolean esAcumulado = "Progreso Acumulado".equals(sel);
         boolean soportaTodos = "Páginas por día de la semana".equals(sel)
@@ -305,7 +305,7 @@ public class GraphWindow extends JFrame {
         boolean muestraLibro = esEstandar || esAcumulado || soportaTodos;
         boolean muestraBarraHitos = esEstandar || esAcumulado || soportaTodos;
 
-        // ── Actualizar lista de libros ────────────────────────────────────────
+
         List<String> lbros = DatabaseManager.obtenerTodosLosLibros();
         if (soportaTodos)
             lbros.addFirst("--- Todos los libros ---");
@@ -317,7 +317,7 @@ public class GraphWindow extends JFrame {
         if (libroSeleccionado != null)
             libroSearchField.setSelectedBook(libroSeleccionado);
 
-        // ── Visibilidad de controles ──────────────────────────────────────────
+
         lblLibro.setVisible(muestraLibro);
         libroSearchField.setVisible(muestraLibro);
 
@@ -345,23 +345,23 @@ public class GraphWindow extends JFrame {
         revalidate();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Refresco de la gráfica
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     private void refrescarGrafica() {
         String metrica = (String) comboMetrica.getSelectedItem();
         if (metrica == null)
             return;
 
-        // Sincronizar libro seleccionado desde el campo
+
         if (!esMetricaComparativa(metrica)) {
             String sel = libroSearchField.getSelectedBook();
             if (sel != null)
                 libroSeleccionado = sel;
         }
 
-        // Sin libro para métricas individuales → mensaje vacío
+
         if (!esMetricaGlobal(metrica) && libroSeleccionado == null) {
             mostrarMensajeSinDatos("Selecciona un libro para ver su gráfica.");
             return;
@@ -372,13 +372,13 @@ public class GraphWindow extends JFrame {
                 ? "01/01/2000"
                 : fieldFecha.getText().trim();
 
-        // Obtener datos
+
         GraphDataProcessor.GraphData data = GraphDataProcessor.obtener(
                 metrica, libroSeleccionado,
                 minPag, fechaFiltro,
                 checkAgrupar.isSelected(), checkCapitulo.isSelected());
 
-        // Sin datos para métricas estándar
+
         if (!esMetricaGlobal(metrica) && !esMetricaComparativa(metrica) && data.isEmpty()) {
             String msg = "Este libro aún no tiene sesiones almacenadas.";
             if ("Actividad por Hora".equals(metrica) && libroSeleccionado != null)

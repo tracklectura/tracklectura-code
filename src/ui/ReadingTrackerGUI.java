@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class ReadingTrackerGUI extends JFrame {
 
-    // ── MEJORA: LRU cache limitado a 30 portadas ──────────────────────────────
+
     private static final int MAX_PORTADAS_CACHE = 30;
     private final Map<String, Image> cachePortadas = new LinkedHashMap<>(MAX_PORTADAS_CACHE, 0.75f, true) {
         @Override
@@ -38,10 +38,10 @@ public class ReadingTrackerGUI extends JFrame {
         }
     };
 
-    // ── MEJORA: Cronómetro extraído a su propia clase ─────────────────────────
+
     private final SessionTimer sessionTimer;
 
-    // Componentes de la interfaz
+
     private BookSearchField libroSearch;
     private StateSelectorField estadoCombo;
     private JButton agregarLibroBtn, editarLibroBtn, eliminarLibroBtn, darkModeBtn,
@@ -54,11 +54,11 @@ public class ReadingTrackerGUI extends JFrame {
 
     private boolean esModoOscuro = false;
 
-    // Selección de portada
+
     private List<String> currentCoverUrls = new ArrayList<>();
     private int currentCoverIndex = 0;
 
-    // Indicador de sync pendiente (actualizado periódicamente)
+
     private final Timer syncCheckTimer;
 
     public ReadingTrackerGUI() {
@@ -73,9 +73,9 @@ public class ReadingTrackerGUI extends JFrame {
         }
 
         setSize(480, 720);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // MEJORA: controlar el cierre manualmente
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        // ── MEJORA: WindowListener para detectar cronómetro activo al cerrar ─────
+
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -90,13 +90,13 @@ public class ReadingTrackerGUI extends JFrame {
                             new String[] { "Guardar y salir", "Salir sin guardar", "Cancelar" },
                             "Cancelar");
                     if (opcion == 0) {
-                        // Guardar sesión y salir
+
                         procesarTerminarSesion();
                         salirAplicacion();
                     } else if (opcion == 1) {
                         salirAplicacion();
                     }
-                    // opcion == 2 o cerrar el diálogo → no hacer nada
+
                 } else {
                     salirAplicacion();
                 }
@@ -105,7 +105,7 @@ public class ReadingTrackerGUI extends JFrame {
 
         setLocationRelativeTo(null);
 
-        // Inicializar cronómetro
+
         sessionTimer = new SessionTimer(tiempo -> tiempoLabel.setText(tiempo));
 
         inicializarComponentes();
@@ -120,10 +120,10 @@ public class ReadingTrackerGUI extends JFrame {
             cargarPortadaAsincrona(libroSearch.getSelectedBook());
         }
 
-        // ── MEJORA: Comprueba cada 60 s si hay sync pendiente y actualiza el título
+
         syncCheckTimer = new Timer(60_000, ignored -> actualizarTituloConSyncStatus());
         syncCheckTimer.start();
-        actualizarTituloConSyncStatus(); // Primera comprobación inmediata
+        actualizarTituloConSyncStatus();
     }
 
     private void salirAplicacion() {
@@ -367,7 +367,7 @@ public class ReadingTrackerGUI extends JFrame {
     private void cambiarColorRecursivo(Container container, Color bg, Color fg, Color inputBg, boolean oscuro) {
         for (Component c : container.getComponents()) {
             if (c instanceof JButton b) {
-                // MEJORA: No sobrescribir colores de botones con colores específicos (timer, portadas)
+
                 if (b == retrocederBtn || b == avanzarBtn || b == reiniciarTimerBtn || 
                     b == correctaCoverBtn || b == otraCoverBtn || b == subirPortadaBtn) {
                     continue;
@@ -438,7 +438,7 @@ public class ReadingTrackerGUI extends JFrame {
             }
         });
 
-        // ── MEJORA: Iniciar/Pausar usan SessionTimer ──────────────────────────────
+
         iniciarBtn.addActionListener(ignored -> {
             sessionTimer.iniciar();
             iniciarBtn.setEnabled(false);
@@ -560,7 +560,7 @@ public class ReadingTrackerGUI extends JFrame {
                 int ultimaPag = DatabaseManager.obtenerUltimaPagina(libroId);
                 paginaInicioField.setText(String.valueOf(ultimaPag));
                 actualizarTituloConSyncStatus();
-                // Recargar estado del libro por si se auto-completó desde HistoryWindow
+
                 String estadoActual = DatabaseManager.obtenerEstadoLibro(libroId);
                 if (estadoActual == null || estadoActual.isEmpty()) estadoActual = "Por leer";
                 estadoCombo.setEnabled(false);

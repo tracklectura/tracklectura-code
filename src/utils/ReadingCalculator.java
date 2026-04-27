@@ -89,20 +89,20 @@ public final class ReadingCalculator {
         if (minutos <= 0.01) {
             return "La sesión es demasiado corta para guardarse.";
         }
-        return null; // válido
+        return null;
      }
 
-    // --- NUEVOS MÉTODOS PARA GRÁFICOS ---
+
 
     /**
      * Extrae la hora de la sesión SOLO si fue registrada con formato de hora.
      * Resuelve el problema de las sesiones manuales.
      */
     public static Integer extraerHoraSegura(String fechaStr) {
-        if (fechaStr == null || !fechaStr.contains(":")) return null; // Ignora sesiones sin hora
+        if (fechaStr == null || !fechaStr.contains(":")) return null;
         try {
             String clean = fechaStr.replace(",", "").trim();
-            // Soporta formatos con o sin coma: "15/03/2026 06:26" o "15/03/2026, 06:26"
+
             java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             return java.time.LocalDateTime.parse(clean, fmt).getHour();
         } catch (Exception e) {

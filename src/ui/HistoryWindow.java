@@ -35,10 +35,10 @@ public class HistoryWindow extends JDialog {
 
         inicializarTabla();
 
-        // Cargar datos locales inmediatamente para no mostrar tabla vacía
+
         cargarDatos();
 
-        // Sincronizar con la nube en segundo plano; al terminar refresca la tabla
+
         sincronizarEnSegundoPlano();
 
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
@@ -74,7 +74,7 @@ public class HistoryWindow extends JDialog {
 
             @Override
             protected void done() {
-                cargarDatos(); // refrescar tabla con datos actualizados
+                cargarDatos();
             }
         }.execute();
     }
@@ -89,7 +89,7 @@ public class HistoryWindow extends JDialog {
         };
         tablaHistorial = new JTable(modeloTabla);
 
-        // Ocultar columna ID
+
         tablaHistorial.getColumnModel().getColumn(0).setMinWidth(0);
         tablaHistorial.getColumnModel().getColumn(0).setMaxWidth(0);
         tablaHistorial.getColumnModel().getColumn(0).setWidth(0);
@@ -162,7 +162,7 @@ public class HistoryWindow extends JDialog {
         String finActual = modeloTabla.getValueAt(filaSel, 4).toString();
         String minActual = modeloTabla.getValueAt(filaSel, 6).toString().replace(",", ".");
 
-        // ── Formulario persistente con JDialog ──────────────────────────────────
+
         JDialog dialog = new JDialog((JDialog) null, "✏️ Editar Sesión", true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setResizable(false);
@@ -177,13 +177,13 @@ public class HistoryWindow extends JDialog {
             utils.ReadingCalculator.silenciarCampo(f);
         }
 
-        // Etiqueta de error roja, inicialmente en blanco
+
         JLabel lblError = new JLabel(" ");
         lblError.setForeground(new Color(200, 50, 50));
         lblError.setFont(lblError.getFont().deriveFont(Font.ITALIC, 11f));
         lblError.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 
-        // Panel de campos con el mismo layout que añadir sesión
+
         JPanel camposPanel = new JPanel(new GridBagLayout());
         camposPanel.setBorder(BorderFactory.createEmptyBorder(12, 16, 4, 16));
         GridBagConstraints gc = new GridBagConstraints();
@@ -213,7 +213,7 @@ public class HistoryWindow extends JDialog {
             camposPanel.add(campos[i], gc);
         }
 
-        // Panel de error + botones
+
         JPanel bottomPanel = new JPanel(new BorderLayout(6, 6));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 8, 10, 8));
         bottomPanel.add(lblError, BorderLayout.NORTH);
@@ -230,14 +230,14 @@ public class HistoryWindow extends JDialog {
         dialog.pack();
         dialog.setLocationRelativeTo(this);
 
-        // ── Acción Cancelar ──────────────────────────────────────────────────────
+
         btnCancelar.addActionListener(ignored -> dialog.dispose());
 
-        // ── Acción Guardar (valida sin cerrar si hay error) ──────────────────────
+
         btnGuardar.addActionListener(ignored -> {
             lblError.setText(" ");
 
-            // 1) Validar fecha
+
             String fechaTexto = fFecha.getText().trim();
             if (esFechaInvalida(fechaTexto)) {
                 lblError.setText("⚠️ Formato de fecha incorrecto. Usa: dd/MM/yyyy HH:mm");
@@ -247,7 +247,7 @@ public class HistoryWindow extends JDialog {
                 return;
             }
 
-            // 2) Validar numéricos
+
             int nIni, nFin;
             double nMin;
             try {
@@ -260,7 +260,7 @@ public class HistoryWindow extends JDialog {
                 return;
             }
 
-            // 3) Validación de lógica de sesión
+
             String errorLogica = utils.ReadingCalculator.validarSesion(nIni, nFin, nMin);
             if (errorLogica != null) {
                 lblError.setText("⚠️ " + errorLogica);
@@ -268,7 +268,7 @@ public class HistoryWindow extends JDialog {
                 return;
             }
 
-            // 4) Guardar
+
             String nCap = fCap.getText().trim();
             int nPags = utils.ReadingCalculator.calcularPaginasLeidas(nIni, nFin);
             double nPpm = utils.ReadingCalculator.calcularPPM(nPags, nMin);
@@ -285,7 +285,7 @@ public class HistoryWindow extends JDialog {
             }
         });
 
-        // Pulsar Enter en cualquier campo activa Guardar
+
         for (JTextField campo : campos) {
             campo.addActionListener(ignored -> btnGuardar.doClick());
         }
@@ -297,12 +297,12 @@ public class HistoryWindow extends JDialog {
         int ultimaPag = DatabaseManager.obtenerUltimaPagina(libroId);
         String fechaDefecto = LocalDateTime.now().format(FMT_ENTRADA);
 
-        // ── Formulario persistente con JDialog ──────────────────────────────────
+
         JDialog dialog = new JDialog((JDialog) null, "➕ Registrar Nueva Sesión", true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setResizable(false);
 
-        // Campos del formulario
+
         JTextField fFecha = new JTextField(fechaDefecto);
         JTextField fCap = new JTextField();
         JTextField fIni = new JTextField(String.valueOf(ultimaPag));
@@ -313,13 +313,13 @@ public class HistoryWindow extends JDialog {
             utils.ReadingCalculator.silenciarCampo(f);
         }
 
-        // Etiqueta de error (roja, inicialmente invisible)
+
         JLabel lblError = new JLabel(" ");
         lblError.setForeground(new Color(200, 50, 50));
         lblError.setFont(lblError.getFont().deriveFont(Font.ITALIC, 11f));
         lblError.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 
-        // Panel de campos
+
         JPanel camposPanel = new JPanel(new GridBagLayout());
         camposPanel.setBorder(BorderFactory.createEmptyBorder(12, 16, 4, 16));
         GridBagConstraints gc = new GridBagConstraints();
@@ -349,7 +349,7 @@ public class HistoryWindow extends JDialog {
             camposPanel.add(campos[i], gc);
         }
 
-        // Panel de error + botones
+
         JPanel bottomPanel = new JPanel(new BorderLayout(6, 6));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 8, 10, 8));
         bottomPanel.add(lblError, BorderLayout.NORTH);

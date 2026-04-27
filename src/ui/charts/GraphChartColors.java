@@ -13,12 +13,12 @@ public final class GraphChartColors {
 
     private GraphChartColors() { /* no instanciable */ }
 
-    // ── Fondos ────────────────────────────────────────────────────────────────
+
     public static Color fondo(boolean oscuro) {
         return oscuro ? new Color(30, 30, 30) : Color.WHITE;
     }
 
-    // ── Texto y ejes ──────────────────────────────────────────────────────────
+
     public static Color texto(boolean oscuro) {
         return oscuro ? new Color(220, 220, 220) : new Color(60, 60, 60);
     }
@@ -35,7 +35,7 @@ public final class GraphChartColors {
         return oscuro ? new Color(60, 60, 60) : new Color(220, 220, 220);
     }
 
-    // ── Paleta de métricas ────────────────────────────────────────────────────
+
     /** Azul para barras de páginas */
     public static final Color BARRAS_PAGINAS   = new Color(70, 130, 180);
     /** Verde para barras de PPM */

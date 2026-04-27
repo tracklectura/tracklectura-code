@@ -33,20 +33,20 @@ public class PanelMetaAnual extends JPanel {
         double porcentaje  = Math.min(1.0, (double) terminados / meta);
         int    anguloLleno = (int) (porcentaje * 360);
 
-        // Fondo del anillo (gris)
+
         g2.setColor(modoOscuro ? new Color(60, 60, 60) : new Color(220, 220, 220));
         g2.fillOval(cx - radioExterior, cy - radioExterior, radioExterior * 2, radioExterior * 2);
 
-        // Relleno del anillo (verde si meta alcanzada, azul si no)
+
         g2.setColor(terminados >= meta ? GraphChartColors.LINEA_META : new Color(70, 130, 180));
         g2.fillArc(cx - radioExterior, cy - radioExterior,
                 radioExterior * 2, radioExterior * 2, 90, -anguloLleno);
 
-        // Hueco central
+
         g2.setColor(getBackground());
         g2.fillOval(cx - radioInterior, cy - radioInterior, radioInterior * 2, radioInterior * 2);
 
-        // Textos centrales
+
         Color colorTexto = GraphChartColors.textoContraste(modoOscuro);
         g2.setColor(colorTexto);
         g2.setFont(new Font("SansSerif", Font.BOLD, 40));

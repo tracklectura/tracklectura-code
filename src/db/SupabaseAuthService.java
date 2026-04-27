@@ -34,16 +34,16 @@ public class SupabaseAuthService {
 
     private static String currentUserId = null;
     private static String currentAccessToken = null;
-    private static String currentRefreshToken = null; // NUEVO: necesario para renovar
+    private static String currentRefreshToken = null;
     private static String currentUserEmail = null;
-    private static long tokenExpiresAt = 0; // epoch millis en que caduca
+    private static long tokenExpiresAt = 0;
 
-    // Renovar si quedan menos de 5 minutos para que caduque el token
+
     private static final long REFRESH_MARGIN_MS = 5 * 60 * 1000L;
 
-    // -------------------------------------------------------------------------
-    // Login
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String login(String email, String password) {
         String urlStr = ConfigManager.getSupabaseUrl() + "/auth/v1/token?grant_type=password";
@@ -71,9 +71,9 @@ public class SupabaseAuthService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Signup
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String signup(String email, String password) {
         String urlStr = ConfigManager.getSupabaseUrl() + "/auth/v1/signup";
@@ -101,9 +101,9 @@ public class SupabaseAuthService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Renovacion automatica del token (NUEVO)
-    // -------------------------------------------------------------------------
+
+
+
 
     /**
      * Comprueba si el access token esta proximo a caducar y lo renueva
@@ -119,7 +119,6 @@ public class SupabaseAuthService {
         if (currentAccessToken == null)
             return false;
 
-        // Si el token no caduca en los proximos 5 minutos, esta bien
         if (System.currentTimeMillis() < tokenExpiresAt - REFRESH_MARGIN_MS)
             return true;
 
@@ -166,9 +165,9 @@ public class SupabaseAuthService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Restablecimiento de contraseña
-    // -------------------------------------------------------------------------
+
+
+
 
     /**
      * Envía un correo de restablecimiento de contraseña al email indicado.
@@ -196,10 +195,8 @@ public class SupabaseAuthService {
 
             HttpResponse<String> response = enviarPost(urlStr, anonKey, body.toString());
 
-            // Supabase devuelve 200 tanto si el email existe como si no
-            // (por seguridad no revela si el usuario está registrado).
             if (response.statusCode() == 200) {
-                return null; // éxito
+                return null;
             } else {
                 return "Error al enviar el email: "
                         + extraerMensajeError(response.body(), "No se pudo enviar el correo.");
@@ -210,9 +207,9 @@ public class SupabaseAuthService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Getters
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String getCurrentUserId() {
         return currentUserId;
@@ -226,9 +223,9 @@ public class SupabaseAuthService {
         return currentUserEmail;
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers privados
-    // -------------------------------------------------------------------------
+
+
+
 
     private static HttpResponse<String> enviarPost(String url, String anonKey, String jsonBody) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
@@ -255,12 +252,12 @@ public class SupabaseAuthService {
                 currentAccessToken = root.get("access_token").getAsString();
             }
 
-            // Guardar el refresh_token para renovaciones futuras
+
             if (root.has("refresh_token") && !root.get("refresh_token").isJsonNull()) {
                 currentRefreshToken = root.get("refresh_token").getAsString();
             }
 
-            // Calcular cuándo caduca el access_token
+
             if (root.has("expires_in") && !root.get("expires_in").isJsonNull()) {
                 long expiresInSeconds = root.get("expires_in").getAsLong();
                 tokenExpiresAt = System.currentTimeMillis() + (expiresInSeconds * 1000L);

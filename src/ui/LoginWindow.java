@@ -92,7 +92,7 @@ public class LoginWindow extends JFrame {
         offlineBtn.addActionListener(ignored -> performOfflineLogin());
         resetBtn.addActionListener(ignored -> performPasswordReset());
 
-        // Enter en cualquier campo dispara el login
+
         java.awt.event.ActionListener enterListener = ignored -> loginBtn.doClick();
         emailField.addActionListener(enterListener);
         passwordField.addActionListener(enterListener);

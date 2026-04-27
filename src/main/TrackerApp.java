@@ -22,13 +22,10 @@ public class TrackerApp {
 
     public static void main(String[] args) {
 
-        // --- Cargar credenciales de Supabase de forma segura ---
         cargarCredencialesSupabase();
 
-        // Hook de apagado: sincronizar cambios locales
         Runtime.getRuntime().addShutdownHook(new Thread(DatabaseManager::cerrarYSincronizar));
 
-        // Aplicar tema visual (FlatLaf) según la preferencia guardada
         try {
             if (ConfigManager.isDarkMode()) {
                 com.formdev.flatlaf.FlatDarkLaf.setup();
@@ -38,19 +35,16 @@ public class TrackerApp {
         } catch (Exception ignored) {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ex) {
-                /* sin LAF personalizado */ }
+            } catch (Exception ex) {}
         }
 
-
-        // Lanzar la UI en el Event Dispatch Thread de Swing
         SwingUtilities.invokeLater(
                 () -> new LoginWindow(() -> new ReadingTrackerGUI().setVisible(true)).setVisible(true));
     }
 
     private static void cargarCredencialesSupabase() {
 
-        // Nivel 1: variables de entorno
+
         String envUrl = System.getenv("SUPABASE_URL");
         String envKey = System.getenv("SUPABASE_ANON_KEY");
         if (envUrl != null && !envUrl.isBlank() && envKey != null && !envKey.isBlank()) {
@@ -59,7 +53,7 @@ public class TrackerApp {
             return;
         }
 
-        // Nivel 2: archivo supabase.properties junto al JAR
+
         java.io.File externalFile = resolverArchivoExterno("supabase.properties");
         if (externalFile != null && externalFile.exists()) {
             java.util.Properties p = new java.util.Properties();
@@ -77,12 +71,12 @@ public class TrackerApp {
             }
         }
 
-        // Nivel 3: ya configurado previamente por el usuario — no hacer nada
+
         if (!ConfigManager.getSupabaseUrl().isEmpty() && !ConfigManager.getSupabaseAnonKey().isEmpty()) {
             return;
         }
 
-        // Sin credenciales: pedir al usuario que las configure manualmente
+
         mostrarDialogoConfiguracionInicial();
     }
 
@@ -97,7 +91,7 @@ public class TrackerApp {
             java.io.File jarDir = new java.io.File(location.toURI()).getParentFile();
             return new java.io.File(jarDir, nombreArchivo);
         } catch (Exception e) {
-            // Fallback: directorio de trabajo actual
+
             return new java.io.File(System.getProperty("user.dir"), nombreArchivo);
         }
     }
@@ -131,7 +125,6 @@ public class TrackerApp {
             String url = urlField.getText().trim();
             String key = keyField.getText().trim();
             if (!url.isEmpty() && !key.isEmpty()) {
-                // Se guardan cifrados con AES-GCM (ver ConfigManager mejorado)
                 ConfigManager.setSupabaseUrl(url);
                 ConfigManager.setSupabaseAnonKey(key);
             } else {

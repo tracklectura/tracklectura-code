@@ -104,7 +104,7 @@ public class StateSelectorField extends JPanel {
             popup.setVisible(false);
         } else {
             int ancho = getWidth();
-            // Asegurar que el ancho mínimo se respeta
+
             ancho = Math.max(ancho, 140);
             int alto = states.size() * 28 + 4;
             popup.setPreferredSize(new Dimension(ancho, alto));
@@ -134,7 +134,7 @@ public class StateSelectorField extends JPanel {
         dropdownBtn.setEnabled(enabled);
         selectedStateLabel.setEnabled(enabled);
 
-        // Estilo visual cuando está deshabilitado
+
         if (!enabled) {
             setBackground(bgColor.darker());
         } else {

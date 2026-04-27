@@ -33,7 +33,7 @@ public class FileUtil {
             extension = fileName.substring(dotIndex);
         }
 
-        // Use bookId for a unique and predictable name
+
         String destFileName = "cover_book_" + bookId + extension;
         File destFile = new File(COVERS_DIR, destFileName);
 

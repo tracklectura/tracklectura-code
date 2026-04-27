@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ExportService {
 
-    // Ruta por defecto para las exportaciones
+
     public static String rutaExportacion = ConfigManager.getExportPath();
 
     /**
@@ -34,16 +34,16 @@ public class ExportService {
             try (BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(archivoFinal), StandardCharsets.UTF_8))) {
 
-                writer.write('\ufeff'); // BOM para compatibilidad con Excel
+                writer.write('\ufeff');
 
-                // La primera fila de 'datos' es siempre la cabecera,
-                // construida por el llamador según la métrica activa.
+
+
                 for (String[] fila : datos) {
                     writer.write(String.join(";", fila));
                     writer.newLine();
                 }
 
-                // Cambio clave: Mostrar archivoFinal.getAbsolutePath()
+
                 JOptionPane.showMessageDialog(null,
                         "✅ Datos exportados con éxito.\n\nUbicación:\n" + archivoFinal.getAbsolutePath(),
                         "Exportación CSV", JOptionPane.INFORMATION_MESSAGE);
@@ -77,7 +77,7 @@ public class ExportService {
 
             ImageIO.write(image, "png", archivoFinal);
 
-            // Cambio clave: Mostrar archivoFinal.getAbsolutePath()
+
             JOptionPane.showMessageDialog(null,
                     "✅ Imagen guardada con éxito.\n\nUbicación:\n" + archivoFinal.getAbsolutePath(),
                     "Exportación de Imagen", JOptionPane.INFORMATION_MESSAGE);

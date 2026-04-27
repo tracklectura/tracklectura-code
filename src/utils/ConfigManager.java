@@ -42,22 +42,22 @@ public class ConfigManager {
     private static final String CONFIG_FILE = new File(APP_DATA_DIR, "config.properties").getAbsolutePath();
     private static final String SALT_FILE = new File(APP_DATA_DIR, ".salt").getAbsolutePath();
 
-    // Parámetros AES-GCM
+
     private static final String CIPHER_ALGO = "AES/GCM/NoPadding";
     private static final int GCM_TAG_BITS = 128;
-    private static final int IV_BYTES = 12; // 96 bits, recomendado para GCM
+    private static final int IV_BYTES = 12;
     private static final int KEY_BITS = 256;
     private static final int PBKDF2_ITERS = 120_000;
 
-    // Prefijo para distinguir valores cifrados con GCM de los legacy (ECB)
+
     private static final String GCM_PREFIX = "GCM:";
 
-    // Clave legacy (AES-ECB) solo para migración de versiones anteriores
+
     private static final byte[] LEGACY_AES_KEY = "Tr4ckL3ctur4K3y!".getBytes(StandardCharsets.UTF_8);
 
     private static final Properties props = new Properties();
     private static final SecureRandom rng = new SecureRandom();
-    private static SecretKey aesKey = null; // se deriva una vez, se cachea
+    private static SecretKey aesKey = null;
 
     static {
         cargar();
@@ -65,9 +65,9 @@ public class ConfigManager {
         migrarAGCM();
     }
 
-    // -------------------------------------------------------------------------
-    // Directorio de datos
-    // -------------------------------------------------------------------------
+
+
+
 
     private static File initAppDataDir() {
         String localAppData = System.getenv("LOCALAPPDATA");
@@ -83,9 +83,9 @@ public class ConfigManager {
         return APP_DATA_DIR;
     }
 
-    // -------------------------------------------------------------------------
-    // Carga y guardado
-    // -------------------------------------------------------------------------
+
+
+
 
     private static void cargar() {
         File file = new File(CONFIG_FILE);
@@ -106,9 +106,9 @@ public class ConfigManager {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // API genérica
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String get(String key, String defaultValue) {
         return props.getProperty(key, defaultValue);
@@ -119,9 +119,9 @@ public class ConfigManager {
         guardar();
     }
 
-    // -------------------------------------------------------------------------
-    // Preferencias de la app
-    // -------------------------------------------------------------------------
+
+
+
 
     public static boolean isDarkMode() {
         return Boolean.parseBoolean(get("darkMode", "false"));
@@ -163,9 +163,9 @@ public class ConfigManager {
         set("lastSyncTimestamp", ts);
     }
 
-    // -------------------------------------------------------------------------
-    // Credenciales de Supabase (cifradas con AES-GCM)
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String getSupabaseUrl() {
         return decrypt(get("supabaseUrl", ""));
@@ -183,9 +183,9 @@ public class ConfigManager {
         set("supabaseAnonKey", encrypt(k));
     }
 
-    // -------------------------------------------------------------------------
-    // Credenciales de sesión guardadas (cifradas con AES-GCM)
-    // -------------------------------------------------------------------------
+
+
+
 
     public static String getSavedEmail() {
         return decrypt(get("savedEmail", ""));
@@ -203,9 +203,9 @@ public class ConfigManager {
         set("savedPass", encrypt(p));
     }
 
-    // -------------------------------------------------------------------------
-    // Derivación de clave (PBKDF2 + sal única por instalación)
-    // -------------------------------------------------------------------------
+
+
+
 
     /**
      * Deriva la clave AES-256 una única vez por sesión usando:

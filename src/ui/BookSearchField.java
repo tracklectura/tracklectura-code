@@ -26,7 +26,7 @@ public class BookSearchField extends JPanel {
     private boolean isAdjusting = false;
     private Consumer<String> onSelectionChanged;
 
-    // Colores y estilos (se actualizan con el tema)
+
     private Color bgColor = Color.WHITE;
     private Color fgColor = Color.BLACK;
     private Color selectionBg = new Color(70, 130, 180);
@@ -35,14 +35,14 @@ public class BookSearchField extends JPanel {
         setLayout(new BorderLayout(0, 0));
         setOpaque(false);
 
-        // --- Campo de texto ---
+
         searchField = new JTextField();
         searchField.setFont(new Font("SansSerif", Font.PLAIN, 13));
         searchField.setToolTipText("Escribe para buscar un libro...");
         utils.ReadingCalculator.silenciarCampo(searchField);
         add(searchField, BorderLayout.CENTER);
 
-        // --- Botón desplegable (▼) ---
+
         dropdownBtn = new JButton("▼");
         dropdownBtn.setFont(new Font("SansSerif", Font.PLAIN, 10));
         dropdownBtn.setFocusable(false);
@@ -50,7 +50,7 @@ public class BookSearchField extends JPanel {
         dropdownBtn.setToolTipText("Ver todos los libros");
         add(dropdownBtn, BorderLayout.EAST);
 
-        // --- Lista de resultados ---
+
         listModel = new DefaultListModel<>();
         resultList = new JList<>(listModel);
         resultList.setFont(new Font("SansSerif", Font.PLAIN, 13));
@@ -62,7 +62,7 @@ public class BookSearchField extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        // --- Popup ---
+
         popup = new JPopupMenu();
         popup.setLayout(new BorderLayout());
         popup.setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180)));
@@ -73,7 +73,7 @@ public class BookSearchField extends JPanel {
     }
 
     private void configurarEventos() {
-        // Filtrar mientras el usuario escribe
+
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 filtrar();
@@ -88,7 +88,7 @@ public class BookSearchField extends JPanel {
             }
         });
 
-        // Botón ▼: toggle mostrar todos los libros / cerrar
+
         dropdownBtn.addActionListener(e -> {
             if (popup.isVisible()) {
                 popup.setVisible(false);
@@ -97,7 +97,7 @@ public class BookSearchField extends JPanel {
             }
         });
 
-        // Navegar con teclado (↑ ↓ Enter Escape)
+
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -119,13 +119,11 @@ public class BookSearchField extends JPanel {
                         if (sel != null) {
                             seleccionarLibro(sel);
                         } else if (listModel.size() > 0) {
-                            // Si no hay selección pero hay resultados, elegir el primero
                             seleccionarLibro(listModel.get(0));
                         }
                     }
                     case KeyEvent.VK_ESCAPE -> {
                         popup.setVisible(false);
-                        // Restaurar texto del libro seleccionado al cerrar con Esc
                         if (selectedBook != null)
                             searchField.setText(selectedBook);
                     }
@@ -133,7 +131,7 @@ public class BookSearchField extends JPanel {
             }
         });
 
-        // Clic en la lista → seleccionar
+
         resultList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -143,7 +141,7 @@ public class BookSearchField extends JPanel {
             }
         });
 
-        // Abrir popup al hacer foco (muestra lista completa si campo vacío)
+
         searchField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -156,11 +154,9 @@ public class BookSearchField extends JPanel {
 
             @Override
             public void focusLost(FocusEvent e) {
-                // No cerramos inmediatamente para permitir clics en el JPopupMenu
                 Timer t = new Timer(200, ev -> {
                     if (!searchField.hasFocus() && !resultList.hasFocus()) {
                         popup.setVisible(false);
-                        // Solo restaurar si el campo ha quedado "incompleto" o vacío incorrectamente
                         String current = searchField.getText().trim();
                         if (selectedBook != null && !current.equals(selectedBook) && !current.isEmpty()) {
                             searchField.setText(selectedBook);
@@ -177,14 +173,9 @@ public class BookSearchField extends JPanel {
     private void filtrar() {
         if (isAdjusting)
             return;
-
-        // Si el popup estaba abierto en modo "todos", cerrarlo antes de filtrar
-        // No hacemos nada especial: el mismo popup se actualiza con los resultados
-        // filtrados
         String query = searchField.getText().trim().toLowerCase();
         listModel.clear();
 
-        // Si el campo está vacío, cerramos el popup (salvo que se pulse el botón dropdown)
         if (query.isEmpty()) {
             popup.setVisible(false);
             return;
@@ -209,7 +200,6 @@ public class BookSearchField extends JPanel {
         if (!hayCoincidencias) {
             popup.setVisible(false);
         } else {
-            // Si ya estaba visible (modo desplegable) solo actualizamos el contenido
             actualizarOShowPopup();
             if (selectedBook != null) {
                 int idx = listModel.indexOf(selectedBook);
@@ -260,7 +250,6 @@ public class BookSearchField extends JPanel {
             popup.setPreferredSize(new Dimension(ancho, alto));
             popup.pack();
 
-            // Determinar si mostrar arriba o abajo basado en el espacio en la ventana
             Component window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 Point p = new Point(0, 0);
@@ -271,10 +260,8 @@ public class BookSearchField extends JPanel {
                 int spaceBelow = screenBounds.y + screenBounds.height - (p.y + getHeight());
                 
                 if (spaceBelow < alto + 20 && p.y > alto) {
-                    // Mostrar arriba
                     popup.show(this, 0, -alto);
                 } else {
-                    // Mostrar abajo
                     popup.show(this, 0, getHeight());
                 }
             } else {
@@ -293,9 +280,6 @@ public class BookSearchField extends JPanel {
             onSelectionChanged.accept(libro);
         }
     }
-
-    // ---- API pública ----
-
     /** Carga la lista completa de libros disponibles */
     public void setBooks(List<String> books) {
         this.allBooks = new ArrayList<>(books);

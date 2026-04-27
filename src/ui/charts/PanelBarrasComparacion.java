@@ -47,13 +47,13 @@ public class PanelBarrasComparacion extends JPanel {
 
         double maxPpm = datos.stream().mapToDouble(DataPoint::getValor).max().orElse(1);
 
-        // Título
+
         g2.setColor(colorTexto);
         g2.setFont(new Font("SansSerif", Font.BOLD, 15));
         String titulo = "⚡ PPM Media — Libros Terminados";
         g2.drawString(titulo, mIzq + (areaW - g2.getFontMetrics().stringWidth(titulo)) / 2, 32);
 
-        // Grid vertical + etiquetas eje superior
+
         int nGrid = 5;
         g2.setFont(new Font("SansSerif", Font.PLAIN, 10));
         for (int i = 0; i <= nGrid; i++) {
@@ -67,13 +67,13 @@ public class PanelBarrasComparacion extends JPanel {
         }
         g2.setStroke(new BasicStroke(1.5f));
 
-        // Label eje X
+
         g2.setColor(colorTexto);
         g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
         String labelEje = "PPM (páginas / minuto)";
         g2.drawString(labelEje, mIzq + (areaW - g2.getFontMetrics().stringWidth(labelEje)) / 2, h - 12);
 
-        // Barras
+
         for (int i = 0; i < n; i++) {
             DataPoint p      = datos.get(i);
             int yBarra       = mSup + espaciado + i * (alturaBarra + espaciado);
@@ -82,7 +82,7 @@ public class PanelBarrasComparacion extends JPanel {
             g2.setColor(i == 0 ? colorTop : colorBarra);
             g2.fillRoundRect(mIzq, yBarra, anchoBarra, alturaBarra, 6, 6);
 
-            // Nombre libro a la izquierda
+
             g2.setColor(colorTexto);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
             String nombre = utils.ReadingCalculator.acortar(p.getEtiqueta(), 30);
@@ -90,7 +90,7 @@ public class PanelBarrasComparacion extends JPanel {
                     mIzq - g2.getFontMetrics().stringWidth(nombre) - 8,
                     yBarra + alturaBarra / 2 + 5);
 
-            // Valor al final de la barra
+
             g2.setFont(new Font("SansSerif", Font.BOLD, 11));
             g2.setColor(modoOscuro ? Color.LIGHT_GRAY : Color.DARK_GRAY);
             g2.drawString(String.format("%.2f ppm", p.getValor()),
@@ -98,7 +98,7 @@ public class PanelBarrasComparacion extends JPanel {
                     yBarra + alturaBarra / 2 + 5);
         }
 
-        // Eje X base
+
         g2.setColor(colorTexto);
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawLine(mIzq, h - mInf, w - mDer, h - mInf);

@@ -20,9 +20,9 @@ import java.util.List;
 
 public class BookCoverService {
 
-    // -------------------------------------------------------------------------
-    // Métodos existentes (sin cambios)
-    // -------------------------------------------------------------------------
+
+
+
 
     public static BufferedImage fetchCoverImage(String title) {
         List<String> urls = fetchCoverUrls(title);
@@ -56,7 +56,7 @@ public class BookCoverService {
                 conn.setReadTimeout(5000);
                 return ImageIO.read(conn.getInputStream());
             } else {
-                // Ruta local (fallback para modo offline)
+
                 File file = new File(urlStr);
                 if (file.exists()) {
                     return ImageIO.read(file);
@@ -69,9 +69,9 @@ public class BookCoverService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // NUEVO: Subida de imagen a Supabase Storage
-    // -------------------------------------------------------------------------
+
+
+
 
     /**
      * Sube una imagen local al bucket "covers" de Supabase Storage y devuelve
@@ -85,7 +85,7 @@ public class BookCoverService {
      * 1. Lee los bytes del archivo local
      * 2. Hace PUT al endpoint de Supabase Storage
      * 3. Devuelve la URL pública:
-     * https://<proyecto>.supabase.co/storage/v1/object/public/covers/<nombre>
+     * https:
      *
      * Si falla (sin conexión, token caducado, etc.) devuelve null y el
      * llamador puede hacer fallback a la ruta local para modo offline.
@@ -99,7 +99,7 @@ public class BookCoverService {
         String supabaseUrl = ConfigManager.getSupabaseUrl();
         String accessToken = SupabaseAuthService.getCurrentAccessToken();
 
-        // En modo offline o sin sesión activa no se puede subir
+
         if (supabaseUrl == null || supabaseUrl.isEmpty()) {
             System.err.println("[BookCoverService] Supabase URL no configurada.");
             return null;
@@ -112,12 +112,12 @@ public class BookCoverService {
         try {
             byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
 
-            // Nombre del archivo en el bucket: "covers/libro_42.jpg"
-            // Usar el libroId garantiza que cada libro tiene exactamente un archivo
-            // y que re-subir reemplaza la versión anterior (upsert=true).
+
+
+
             String nombreArchivo = "libro_" + libroId + "." + extension.toLowerCase();
             String uploadUrl = supabaseUrl
-                    + "/storage/v1/object/covers/" // bucket "covers"
+                    + "/storage/v1/object/covers/"
                     + nombreArchivo;
 
             HttpURLConnection conn = (HttpURLConnection) URI.create(uploadUrl).toURL().openConnection();
@@ -125,7 +125,7 @@ public class BookCoverService {
             conn.setDoOutput(true);
             conn.setRequestProperty("Authorization", "Bearer " + accessToken);
             conn.setRequestProperty("Content-Type", detectarMimeType(extension));
-            // x-upsert: true → si ya existe el archivo lo reemplaza en lugar de dar error
+
             conn.setRequestProperty("x-upsert", "true");
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(15000);
@@ -137,14 +137,14 @@ public class BookCoverService {
             int statusCode = conn.getResponseCode();
 
             if (statusCode == 200 || statusCode == 201) {
-                // Construir la URL pública del archivo subido
+
                 String publicUrl = supabaseUrl
                         + "/storage/v1/object/public/covers/"
                         + nombreArchivo;
                 System.out.println("[BookCoverService] Portada subida: " + publicUrl);
                 return publicUrl;
             } else {
-                // Leer el cuerpo del error para diagnóstico
+
                 String errorBody = leerRespuesta(conn.getErrorStream());
                 System.err.println("[BookCoverService] Error al subir portada (" + statusCode + "): " + errorBody);
                 return null;
@@ -156,16 +156,16 @@ public class BookCoverService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers privados
-    // -------------------------------------------------------------------------
+
+
+
 
     private static String detectarMimeType(String extension) {
         return switch (extension.toLowerCase()) {
             case "png" -> "image/png";
             case "gif" -> "image/gif";
             case "webp" -> "image/webp";
-            default -> "image/jpeg"; // jpg, jpeg y cualquier otro
+            default -> "image/jpeg";
         };
     }
 

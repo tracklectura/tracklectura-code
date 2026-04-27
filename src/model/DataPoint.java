@@ -4,7 +4,7 @@ package model;
 public class DataPoint {
     private final String etiqueta;
     private final double valor;
-    private final double valorSec; // Opcional: segundo eje en gráficas duales
+    private final double valorSec;
     private final String capitulos;
 
     public DataPoint(String etiqueta, double valor, double valorSec, String capitulos) {

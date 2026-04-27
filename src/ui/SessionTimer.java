@@ -57,7 +57,7 @@ public class SessionTimer {
     public void ajustarTiempo(long millisDelta) {
         long totalActual = getTotalMillis();
         if (totalActual + millisDelta < 0) {
-            tiempoAcumulado -= totalActual; // Cap at 0
+            tiempoAcumulado -= totalActual;
         } else {
             tiempoAcumulado += millisDelta;
         }

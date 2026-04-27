@@ -44,7 +44,7 @@ public class PanelScatter extends JPanel {
 
         Color colorTexto = GraphChartColors.textoContraste(modoOscuro);
 
-        // Grid Y (PPM)
+
         int nGridY = 5;
         g2.setFont(new Font("SansSerif", Font.PLAIN, 10));
         for (int i = 0; i <= nGridY; i++) {
@@ -57,7 +57,7 @@ public class PanelScatter extends JPanel {
             g2.drawString(etiq, mIzq - g2.getFontMetrics().stringWidth(etiq) - 5, yGrid + 4);
         }
 
-        // Grid X (Minutos)
+
         int nGridX = 5;
         for (int i = 0; i <= nGridX; i++) {
             int xGrid = mIzq + (areaW * i / nGridX);
@@ -69,13 +69,13 @@ public class PanelScatter extends JPanel {
             g2.drawString(etiq, xGrid - g2.getFontMetrics().stringWidth(etiq) / 2, h - mInf + 15);
         }
 
-        // Ejes principales
+
         g2.setColor(modoOscuro ? new Color(100, 100, 100) : Color.GRAY);
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawLine(mIzq, mSup, mIzq, h - mInf);
         g2.drawLine(mIzq, h - mInf, w - mDer, h - mInf);
 
-        // Puntos
+
         List<Point> puntos = new ArrayList<>();
         for (int i = 0; i < ppm.size(); i++) {
             double min = Double.parseDouble(minutosStr.get(i));
@@ -86,7 +86,7 @@ public class PanelScatter extends JPanel {
         }
         puntos.sort(Comparator.comparingInt(p -> p.x));
 
-        // Línea de tendencia
+
         if (puntos.size() > 1) {
             g2.setColor(new Color(100, 149, 237, 100));
             g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -94,7 +94,7 @@ public class PanelScatter extends JPanel {
                 g2.drawLine(puntos.get(i).x, puntos.get(i).y, puntos.get(i + 1).x, puntos.get(i + 1).y);
         }
 
-        // Puntos de dispersión
+
         for (Point p : puntos) {
             g2.setColor(new Color(100, 149, 237, 180));
             g2.fillOval(p.x - 5, p.y - 5, 10, 10);
@@ -103,7 +103,7 @@ public class PanelScatter extends JPanel {
             g2.drawOval(p.x - 5, p.y - 5, 10, 10);
         }
 
-        // Etiquetas de ejes
+
         g2.setColor(colorTexto);
         g2.setFont(new Font("SansSerif", Font.BOLD, 12));
         g2.drawString("Duración de la Sesión (Minutos)", w / 2 - 80, h - 20);

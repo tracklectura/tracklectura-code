@@ -44,7 +44,6 @@ public class SQLiteSyncService implements DatabaseService {
             try {
                 remote.conectar();
             } catch (Exception e) {
-                // MEJORA: No fallar silenciosamente — loguear y continuar en modo degradado
                 System.err.println("[SQLiteSyncService] No se pudo conectar al remoto: " + e.getMessage()
                         + " — continuando en modo local.");
             }
@@ -66,14 +65,9 @@ public class SQLiteSyncService implements DatabaseService {
         }
         conn = DriverManager.getConnection(url);
 
-        // --- OPTIMIZACIÓN: Mejorar rendimiento de I/O de SQLite ---
         try (Statement stmt = conn.createStatement()) {
-            // WAL (Write-Ahead Logging): Permite lectura/escritura concurrente
             stmt.execute("PRAGMA journal_mode = WAL;");
-            // NORMAL: Ideal para WAL, mejora enormemente la velocidad de escritura sin
-            // riesgo en fsync()
             stmt.execute("PRAGMA synchronous = NORMAL;");
-            // 64MB de Caché
             stmt.execute("PRAGMA cache_size = -64000;");
         } catch (Exception e) {
             System.err.println("Aviso: No se pudieron aplicar PRAGMAs de optimización en SQLite: " + e.getMessage());
@@ -123,7 +117,6 @@ public class SQLiteSyncService implements DatabaseService {
                     "libro_id INTEGER PRIMARY KEY, " +
                     "user_id TEXT)");
 
-            // MEJORA: Índices explícitos para consultas frecuentes
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_sesiones_libro_user " +
                     "ON sesiones(libro_id, user_id)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_sesiones_user_dirty " +
@@ -135,7 +128,7 @@ public class SQLiteSyncService implements DatabaseService {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_libros_user_dirty " +
                     "ON libros(user_id, dirty)");
 
-            // --- MIGRACIÓN PARA 'libros' ---
+
             boolean needsLibrosMigration = false;
             ResultSet rsCheckLibros = conn.getMetaData().getColumns(null, null, "libros", "id");
             if (rsCheckLibros.next()) {
@@ -167,7 +160,7 @@ public class SQLiteSyncService implements DatabaseService {
                 System.out.println("Migración de 'libros' completada.");
             }
 
-            // --- MIGRACIÓN PARA 'sesiones' ---
+
             boolean needsSesionesMigration = false;
             ResultSet rsCheckSesiones = conn.getMetaData().getColumns(null, null, "sesiones", "id");
             if (rsCheckSesiones.next()) {
@@ -518,12 +511,6 @@ public class SQLiteSyncService implements DatabaseService {
             System.err.println("[SQLiteSync] Error en obtenerSesionesPorLibro: " + e.getMessage());
         }
 
-        // Eliminado el fallback a 'remote.obtenerSesionesPorLibro(lId)' si
-        // list.isEmpty()
-        // porque rompe el borrado de la última sesión (la recupera de la nube antes de
-        // que la orden de borrado de fondo llegue al servidor).
-        // La app ya sincroniza la base de datos local al inicio y en background.
-
         return list;
     }
 
@@ -563,8 +550,6 @@ public class SQLiteSyncService implements DatabaseService {
             ps.setString(2, getLocalUserId());
             boolean ok = ps.executeUpdate() > 0;
             if (ok && uuid != null && !utils.ConfigManager.isOfflineMode()) {
-                // MEJORA: Registrar en deleted_sesiones de inmediato (previene race-condition
-                // al reinstanciar en descargas rápidas)
                 try (PreparedStatement psDel = conn.prepareStatement(
                         "INSERT OR IGNORE INTO deleted_sesiones(uuid, user_id) VALUES(?,?)")) {
                     psDel.setString(1, uuid);
@@ -687,7 +672,6 @@ public class SQLiteSyncService implements DatabaseService {
                 System.err.println("[SQLiteSync] Fallo remoto en obtenerDiaMasLectura: " + e.getMessage());
             }
         }
-        // Fallback: calcular localmente
         try {
             String uid = getLocalUserId();
             Map<String, Double> porDia = new java.util.HashMap<>();
@@ -727,9 +711,6 @@ public class SQLiteSyncService implements DatabaseService {
             int racha = 0;
             List<LocalDate> fechas = new ArrayList<>();
             DateTimeFormatter fmtApp = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            // OPTIMIZACIÓN: Solo traemos la columna de fecha sin instanciar miles de
-            // modelos de Sesion
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT fecha FROM sesiones WHERE user_id=? AND fecha IS NOT NULL AND fecha != ''")) {
                 ps.setString(1, getLocalUserId());
@@ -776,8 +757,6 @@ public class SQLiteSyncService implements DatabaseService {
         String hoyNormalizado = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         int total = 0;
         try {
-            // OPTIMIZACIÓN: Solo leer 'fecha' y 'paginas_leidas', evitando Memory Leaks
-            // instanciando todas las sesiones.
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT fecha, paginas_leidas FROM sesiones WHERE user_id=? AND fecha IS NOT NULL AND fecha != ''")) {
                 ps.setString(1, getLocalUserId());
@@ -870,7 +849,6 @@ public class SQLiteSyncService implements DatabaseService {
 
     @Override
     public List<String[]> obtenerDatosParaExportar(int libroId, int minPag, String fFiltro, boolean agrupar) {
-        // Consulta local SQLite — siempre disponible, incluso en modo offline
         String uid = getLocalUserId();
         List<String[]> data = new ArrayList<>();
         String fFiltroEfectivo = (fFiltro == null || fFiltro.isBlank()) ? "01/01/2000" : fFiltro;
@@ -971,7 +949,6 @@ public class SQLiteSyncService implements DatabaseService {
                     });
                 }
                 if (agrupar) {
-                    // Agrupar por libro+fecha
                     java.util.LinkedHashMap<String, List<String[]>> grupos = new java.util.LinkedHashMap<>();
                     for (String[] r : raw) {
                         String key = r[0] + "|" + r[1].substring(0, Math.min(10, r[1].length()));
@@ -1284,7 +1261,6 @@ public class SQLiteSyncService implements DatabaseService {
                         }
                     }
 
-                    // MEJORA: Evitar que sesiones eliminadas asíncronamente se vuelvan a inyectar
                     boolean eliminadaPendiente = false;
                     try (PreparedStatement checkDel = conn
                             .prepareStatement("SELECT uuid FROM deleted_sesiones WHERE uuid=?")) {

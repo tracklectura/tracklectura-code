@@ -3,7 +3,7 @@ package model;
 /** Modelo que representa una sesión de lectura individual. */
 public class Sesion {
     private final int id;
-    private final String uuid; // Identificador único para sincronización nube
+    private final String uuid;
     private final int libroId;
     private final String fecha;
     private final String capitulo;

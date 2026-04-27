@@ -40,7 +40,6 @@ public interface DatabaseService {
         boolean actualizarSesionCompleta(int id, int ini, int fin, int pags, double mins, double ppm, double pph,
                         String cap, String fecha);
 
-        // Estadísticas
         int obtenerPaginasTotales(int libroId);
 
         double obtenerPromedioPPH(int libroId);
@@ -69,35 +68,23 @@ public interface DatabaseService {
         boolean insertarSesionManualConUuid(int lId, String fecha, String cap, int ini, int fin, int pags, double mins,
                         double ppm, double pph, String uuid);
 
-        // Nuevo método para abstraer SQL de gráficas
         List<DataPoint> obtenerDatosGrafica(String column, int libroId, int minPag, boolean agruparPorDia,
                         boolean esHeatmap,
                         boolean esDual);
 
-        // Nuevo método para abstraer SQL de exportación
         List<String[]> obtenerDatosParaExportar(int libroId, int minPag, String fFiltro, boolean agrupar);
 
-        // Nuevo método para sincronización masiva (Local-First)
         void sincronizarConNube();
 
         List<Sesion> obtenerTodasLasSesionesDesde(String timestamp);
 
         List<model.Libro> obtenerTodosLosLibrosDesde(String timestamp);
 
-        /**
-         * Elimina un libro y todas sus sesiones (local y remoto).
-         * 
-         * @param libroId ID del libro a eliminar
-         * @return true si se eliminó correctamente
-         */
+
         boolean eliminarLibro(int libroId);
 
         List<DataPoint> obtenerPpmMediaPorLibroTerminado();
 
-        /**
-         * Exporta sesiones de todos los libros del usuario con columna Libro incluida.
-         * Columnas: Libro;Fecha;Capítulo;Páginas;Minutos;PPM;PPH
-         */
         List<String[]> obtenerDatosParaExportarTodos(String fFiltro, int minPag, boolean agrupar);
 
 }

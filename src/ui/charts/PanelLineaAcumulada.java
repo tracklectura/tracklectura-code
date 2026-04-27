@@ -52,7 +52,7 @@ public class PanelLineaAcumulada extends JPanel {
                 valores.stream().mapToDouble(Double::doubleValue).max().orElse(1),
                 totalPaginas > 0 ? totalPaginas : 1);
 
-        // Grid horizontal
+
         int nGrid = 5;
         g2.setFont(new Font("SansSerif", Font.PLAIN, 10));
         for (int i = 0; i <= nGrid; i++) {
@@ -66,7 +66,7 @@ public class PanelLineaAcumulada extends JPanel {
         }
         g2.setStroke(new BasicStroke(1.5f));
 
-        // Línea de meta
+
         if (totalPaginas > 0) {
             int yMeta = h - mInf - (int) (areaH * totalPaginas / maxVal);
             g2.setColor(colorMeta);
@@ -77,7 +77,7 @@ public class PanelLineaAcumulada extends JPanel {
             g2.setStroke(new BasicStroke(1.5f));
         }
 
-        // Coordenadas
+
         int[] px = new int[n];
         int[] py = new int[n];
         for (int i = 0; i < n; i++) {
@@ -85,7 +85,7 @@ public class PanelLineaAcumulada extends JPanel {
             py[i] = h - mInf - (int) (areaH * valores.get(i) / maxVal);
         }
 
-        // Relleno bajo la línea
+
         Polygon relleno = new Polygon();
         relleno.addPoint(px[0], h - mInf);
         for (int i = 0; i < n; i++) relleno.addPoint(px[i], py[i]);
@@ -93,13 +93,13 @@ public class PanelLineaAcumulada extends JPanel {
         g2.setColor(colorRelleno);
         g2.fillPolygon(relleno);
 
-        // Línea principal
+
         g2.setColor(colorLinea);
         g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         for (int i = 0; i < n - 1; i++)
             g2.drawLine(px[i], py[i], px[i + 1], py[i + 1]);
 
-        // Puntos y etiquetas
+
         for (int i = 0; i < n; i++) {
             g2.setColor(colorLinea);
             g2.fillOval(px[i] - 4, py[i] - 4, 8, 8);
@@ -122,7 +122,7 @@ public class PanelLineaAcumulada extends JPanel {
             g2.setTransform(old);
         }
 
-        // Ejes
+
         g2.setColor(colorEjes);
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawLine(mIzq, mSup, mIzq, h - mInf);

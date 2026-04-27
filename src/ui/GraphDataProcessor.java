@@ -29,9 +29,9 @@ public final class GraphDataProcessor {
 
     private GraphDataProcessor() { /* no instanciable */ }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // DTO de resultado
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     /** Contenedor inmutable de los tres ejes de datos de una gráfica. */
     public record GraphData(List<String> fechas, List<Double> valores, List<Double> valoresSec) {
@@ -44,9 +44,9 @@ public final class GraphDataProcessor {
         public boolean isEmpty() { return fechas.isEmpty(); }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Método principal — despacha según la métrica seleccionada
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     /**
      * Obtiene y procesa los datos necesarios para la métrica indicada.
@@ -64,8 +64,8 @@ public final class GraphDataProcessor {
                                     boolean agruparPorDia, boolean mostrarCapitulo) {
         return switch (metrica) {
             case "Mapa de Consistencia"          -> heatmap();
-            case "Meta Anual"                    -> vacio();   // el panel lo carga solo
-            case "PPM Comparativa"               -> vacio();   // el panel lo carga solo
+            case "Meta Anual"                    -> vacio();
+            case "PPM Comparativa"               -> vacio();
             case "Evolución Mensual"             -> evolucionMensual();
             case "Correlación: Minutos vs PPM"   -> correlacionMinutosPpm(libroSeleccionado);
             case "Páginas por día de la semana"  -> paginasPorDiaSemana(libroSeleccionado);
@@ -77,9 +77,9 @@ public final class GraphDataProcessor {
         };
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Métricas individuales
-    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
     /** Datos para el heatmap de consistencia (todas las sesiones globales). */
     private static GraphData heatmap() {
@@ -212,7 +212,7 @@ public final class GraphDataProcessor {
                 valores.add(e.getValue());
             }
 
-            // Añadir punto de inicio
+
             if (!valores.isEmpty() && valores.getFirst() > 0) {
                 fechas.addFirst("Inicio");
                 valores.addFirst(0.0);
@@ -255,11 +255,11 @@ public final class GraphDataProcessor {
                 LocalDate fecha = GraphDateUtils.parsearFecha(p.getEtiqueta());
                 if (fecha == null) continue;
 
-                // Filtro páginas mínimas
+
                 double paginasDelPunto = "ppm".equals(colSql) ? p.getValorSec() : p.getValor();
                 if (minPag > 0 && paginasDelPunto < minPag) continue;
 
-                // Filtro fecha
+
                 if (fFiltroDate != null && fecha.isBefore(fFiltroDate)) continue;
 
                 double val    = p.getValor();
@@ -310,7 +310,7 @@ public final class GraphDataProcessor {
                     }
                 }
             } else {
-                // Ordenar por fecha si no está agrupado
+
                 ordenarPorFecha(fechas, valores, valoresSec, esDual);
             }
 
