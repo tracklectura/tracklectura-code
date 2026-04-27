@@ -1,0 +1,89 @@
+name: Reading Tracker – Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: JUnit 5 – Java ${{ matrix.java }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java: [17, 21]
+
+    steps:
+      # ── 1. Código fuente ──────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. JDK ───────────────────────────────────────────────
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      # ── 3. Cache de JARs de JUnit ────────────────────────────
+      - name: Cache JUnit 5 JARs
+        id: cache-junit
+        uses: actions/cache@v4
+        with:
+          path: lib
+          key: junit5-1.10.2
+
+      # ── 4. Descargar JUnit 5 si no están en caché ─────────────
+      - name: Download JUnit 5 JARs
+        if: steps.cache-junit.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p lib
+          BASE="https://repo1.maven.org/maven2"
+          JU="org/junit/jupiter"
+          JP="org/junit/platform"
+
+          curl -fsSL "$BASE/$JU/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar"           -o lib/junit-jupiter-api.jar
+          curl -fsSL "$BASE/$JU/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar"     -o lib/junit-jupiter-engine.jar
+          curl -fsSL "$BASE/$JU/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar"     -o lib/junit-jupiter-params.jar
+          curl -fsSL "$BASE/$JP/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar"   -o lib/junit-platform-engine.jar
+          curl -fsSL "$BASE/$JP/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar" -o lib/junit-platform-commons.jar
+          curl -fsSL "$BASE/$JP/junit-platform-launcher/1.10.2/junit-platform-launcher-1.10.2.jar" -o lib/junit-platform-launcher.jar
+          curl -fsSL "$BASE/$JP/junit-platform-console-standalone/1.10.2/junit-platform-console-standalone-1.10.2.jar" \
+               -o lib/junit-platform-console-standalone.jar
+          curl -fsSL "$BASE/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" -o lib/opentest4j.jar
+
+      # ── 5. Compilar código de producción ─────────────────────
+      # El proyecto usa IntelliJ layout: los .java están en src/ directamente
+      - name: Compile production sources
+        run: |
+          mkdir -p out/production
+          echo "📦 Compilando fuentes de producción desde src/..."
+          find src -name "*.java" | xargs javac \
+            -encoding UTF-8 \
+            -cp "lib/*" \
+            -d out/production
+
+      # ── 6. Compilar tests ────────────────────────────────────
+      - name: Compile test sources
+        run: |
+          mkdir -p out/test
+          echo "🧪 Compilando tests desde test/..."
+          find test -name "*.java" | xargs javac \
+            -encoding UTF-8 \
+            -cp "lib/*:out/production" \
+            -d out/test
+
+      # ── 7. Ejecutar tests ────────────────────────────────────
+      - name: Run tests
+        run: |
+          echo "🚀 Ejecutando tests..."
+          java \
+            -cp "lib/*:out/production:out/test" \
+            org.junit.platform.console.ConsoleLauncher \
+            --scan-classpath \
+            --fail-if-no-tests \
+            --details=tree \
+            --details-theme=unicode \
+            --exclude-tag=integration
